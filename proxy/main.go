@@ -23,9 +23,9 @@ func init() {
 	tokenAuth = jwtauth.New("HS256", []byte("secret"), nil)
 }
 
-// @title Your API Title
+// @title My Title
 // @version 1.0
-// @description Your API description. You can use Markdown here.
+// @description Some useful description
 // @host localhost:8000
 // @BasePath /
 func main() {
@@ -106,64 +106,3 @@ func WorkerTest() {
 		}
 	}
 }
-
-/*gin.SetMode(gin.ReleaseMode)
-	r := chi.NewRouter()
-	s := gin.New()
-	r.Use(middleware.Logger)
-	proxy := NewReverseProxy("hugo", "1313")
-	err := os.Setenv("HOST", proxy.host)
-	if err != nil {
-		return
-	}
-	r.Use(proxy.ReverseProxy)
-
-	r.Get("/api", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Hello from API"))
-	})
-	r.Post("/api/register", register)
-	r.Post("/api/login", login)
-
-	r.Group(func(r chi.Router) {
-		r.Use(jwtauth.Verifier(tokenAuth))
-		r.Use(jwtauth.Authenticator)
-
-		r.Post("/api/address/search", Search)
-		r.Post("/api/address/geocode", geocodeAddress)
-	})
-	s.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	s.Run(":8080")
-	corsHandler := cors.Default().Handler(r)
-	go WorkerTest()
-	stopChan := make(chan os.Signal, 1)
-	signal.Notify(stopChan, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-
-	go func() {
-		log.Println("Starting server...")
-		if err = server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("Server error: %v", err)
-		}
-	}()
-		go func() {
-		err = http.ListenAndServe(":8080	", corsHandler)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	log.Println("Server started")
-
-	<-stopChan
-
-	log.Println("Shutting down server gracefully...")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	if err = server.Shutdown(ctx); err != nil {
-		log.Fatalf("Error during server shutdown: %v", err)
-	}
-
-	log.Println("Server stopped gracefully")
-}*/

@@ -33,11 +33,18 @@ definitions:
           $ref: '#/definitions/main.Address'
         type: array
     type: object
+  main.User:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
 host: localhost:8000
 info:
   contact: {}
-  description: Your API description. You can use Markdown here.
-  title: Your API Title
+  description: Some useful description
+  title: My Title
   version: "1.0"
 paths:
   /api/address/geocode:
@@ -99,9 +106,34 @@ paths:
       consumes:
       - application/json
       description: Позволяет пользователям войти в систему и получить JWT-токен.
+      parameters:
+      - description: Информация о пользователе для входа
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/main.User'
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: Успешный вход, возвращает JWT-токен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Неверный формат запроса
+          schema:
+            type: string
+        "401":
+          description: Пользователь не найден или неверные учетные данные
+          schema:
+            type: string
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            type: string
       summary: Вход пользователя
       tags:
       - auth
@@ -110,9 +142,30 @@ paths:
       consumes:
       - application/json
       description: Позволяет пользователям зарегистрироваться и получить JWT-токен.
+      parameters:
+      - description: Информация о пользователе
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/main.User'
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: Успешная регистрация, возвращает сообщение
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Неверный формат запроса
+          schema:
+            type: string
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            type: string
       summary: Регистрация пользователя
       tags:
       - auth

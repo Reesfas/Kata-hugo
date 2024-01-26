@@ -21,6 +21,10 @@ var users = make(map[string]string)
 // @Tags auth
 // @Accept json
 // @Produce json
+// @Param user body User true "Информация о пользователе"
+// @Success 200 {object} map[string]string "Успешная регистрация, возвращает сообщение"
+// @Failure 400 {string} string "Неверный формат запроса"
+// @Failure 500 {string} string "Внутренняя ошибка сервера"
 // @Router /api/register [post]
 func register(w http.ResponseWriter, r *http.Request) {
 	var user User
@@ -30,7 +34,6 @@ func register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Хеширование пароля перед сохранением
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -49,6 +52,11 @@ func register(w http.ResponseWriter, r *http.Request) {
 // @Tags auth
 // @Accept json
 // @Produce json
+// @Param input body User true "Информация о пользователе для входа"
+// @Success 200 {object} map[string]string "Успешный вход, возвращает JWT-токен"
+// @Failure 400 {string} string "Неверный формат запроса"
+// @Failure 401 {string} string "Пользователь не найден или неверные учетные данные"
+// @Failure 500 {string} string "Внутренняя ошибка сервера"
 // @Router /api/login [post]
 func login(w http.ResponseWriter, r *http.Request) {
 	var user User
@@ -58,21 +66,18 @@ func login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Проверка существования пользователя
 	storedPassword, exists := users[user.Username]
 	if !exists {
 		http.Error(w, "User not found", http.StatusUnauthorized)
 		return
 	}
 
-	// Проверка совпадения паролей
 	err = bcrypt.CompareHashAndPassword([]byte(storedPassword), []byte(user.Password))
 	if err != nil {
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 		return
 	}
 
-	// Генерация JWT-токена
 	claims := jwt.MapClaims{"username": user.Username}
 	_, tokenString, err := tokenAuth.Encode(claims)
 	if err != nil {
@@ -80,7 +85,6 @@ func login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Отправка токена в ответе
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"token": tokenString})
 }
