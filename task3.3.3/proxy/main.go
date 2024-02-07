@@ -10,8 +10,9 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 	"gitlab.com/ptflp/goboilerplate/config"
 	"golang.org/x/net/context"
-	_ "hugoproxy-main/proxy/docs"
-	"hugoproxy-main/proxy/internal/controller"
+	_ "hugoproxy-main/task3.3.3/proxy/docs"
+	"hugoproxy-main/task3.3.3/proxy/internal/controller"
+	"hugoproxy-main/task3.3.3/proxy/internal/service"
 	"log"
 	"net/http"
 	"os"
@@ -47,8 +48,9 @@ func main() {
 	})
 	conf := config.NewAppConf()
 	logger := NewLogger(conf, os.Stdout)
-	controller.NewResponder(decoder, logger)
-	geocode := controller.NewGeo()
+	resp := controller.NewResponder(decoder, logger)
+	geo := service.NewGeoSerive()
+	geocode := controller.NewGeo(geo, resp)
 	r.Use(proxy.ReverseProxy)
 	r.Get("/swagger/*", httpSwagger.Handler())
 	r.Get("/api", func(w http.ResponseWriter, r *http.Request) {
@@ -59,11 +61,11 @@ func main() {
 	r.Post("/api/login", login)
 
 	r.Group(func(r chi.Router) {
-		r.Use(jwtauth.Verifier(tokenAuth))
-		r.Use(jwtauth.Authenticator)
+		//r.Use(jwtauth.Verifier(tokenAuth))
+		//r.Use(jwtauth.Authenticator)
 
 		r.Post("/api/address/search", geocode.Search)
-		r.Post("/api/address/geocode", geocode.geocodeAddress)
+		r.Post("/api/address/geocode", geocode.GeocodeAddress)
 	})
 
 	server := &http.Server{

@@ -1,6 +1,6 @@
-module hugoproxy-main
+module hugoproxy-main/task3.3.3/proxy
 
-go 1.21.5
+go 1.19
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -12,6 +12,7 @@ require (
 	github.com/swaggo/http-swagger v1.3.4
 	github.com/swaggo/swag v1.16.2
 	gitlab.com/ptflp/goboilerplate v0.0.0-20230216084850-799aa8f2a53d
+	go.uber.org/zap v1.21.0
 	golang.org/x/crypto v0.18.0
 	golang.org/x/net v0.20.0
 )
@@ -36,7 +37,6 @@ require (
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
-	go.uber.org/zap v1.21.0 // indirect
 	golang.org/x/tools v0.17.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

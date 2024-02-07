@@ -6,9 +6,9 @@ WORKDIR /app
 
 # Копируем исходники приложения в рабочую директорию
 COPY . .
-COPY ./docs /usr/local/go/src/hugoproxy-main/proxy/docs
+
 # Скачиваем все зависимости
-RUN go mod init test && go mod tidy
+RUN go mod tidy
 
 # Собираем приложение
 RUN go build -o main
@@ -16,10 +16,10 @@ RUN go build -o main
 # Начинаем новую стадию сборки на основе минимального образа
 FROM alpine:latest
 
-# Добавляем исполняемый файл из первой стадии в корневую директорию контейнера
-COPY --from=builder app/main /main
-
-COPY --from=builder app/docs /docs
+# Копируем исполняемый файл и необходимые ресурсы из первой стадии
+COPY --from=builder /app/main /main
+COPY --from=builder /app/docs /docs
+COPY --from=builder /app/internal /internal
 
 # Открываем порт 8080
 EXPOSE 8080

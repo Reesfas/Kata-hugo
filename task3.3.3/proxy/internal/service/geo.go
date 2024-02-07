@@ -33,15 +33,18 @@ type GeocodeRequest struct {
 	Lon string `json:"lng"`
 }
 type Geocoder interface {
-	SearchService() ([]*Address, error)
-	GeocodeadressService(lat, lon string) (*Address, error)
+	SearchService(request SearchRequest) ([]*Address, error)
+	GeocodeAddressService(lat, lon string) (*Address, error)
 }
 
 type GeocodeService struct {
 }
 
-func (g GeocodeService) SearchService() ([]*Address, error) {
-	var request SearchRequest
+func NewGeoSerive() Geocoder {
+	return &GeocodeService{}
+}
+
+func (g *GeocodeService) SearchService(request SearchRequest) ([]*Address, error) {
 	cleanApi := dadata.NewCleanApi(client.WithCredentialProvider(&client.Credentials{
 		ApiKeyValue:    "52a132510af242610a33fea8352874a271dbfebc",
 		SecretKeyValue: "c79449d80f97afab795c7f1eda5a746d32391831"}))
@@ -56,6 +59,6 @@ func (g GeocodeService) SearchService() ([]*Address, error) {
 	return result, nil
 }
 
-func (g *GeocodeService) GeocodeadressService(lat, lon string) (*Address, error) {
+func (g *GeocodeService) GeocodeAddressService(lat, lon string) (*Address, error) {
 	return &Address{Lat: lat, Lon: lon}, nil
 }
