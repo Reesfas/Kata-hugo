@@ -9,7 +9,6 @@ import (
 	"golang.org/x/net/context"
 	_ "hugoproxy-main/proxy/docs"
 	"log"
-	"math/rand"
 	"net/http"
 	"os"
 	"os/signal"
@@ -46,8 +45,8 @@ func main() {
 	r.Post("/api/login", login)
 
 	r.Group(func(r chi.Router) {
-		r.Use(jwtauth.Verifier(tokenAuth))
-		r.Use(jwtauth.Authenticator)
+		//r.Use(jwtauth.Verifier(tokenAuth))
+		//r.Use(jwtauth.Authenticator)
 
 		r.Post("/api/address/search", Search)
 		r.Post("/api/address/geocode", geocodeAddress)
@@ -78,92 +77,3 @@ func main() {
 	}
 	<-stop
 }
-
-func WorkerTest() {
-	t := time.NewTicker(5 * time.Second)
-	var b int = 0
-	tree := GenerateTree(5)
-	for {
-		select {
-		case tt := <-t.C:
-			err := updateFile("/app/static/tasks/_index.md", tt, b)
-			if err != nil {
-				log.Println(err)
-			}
-			graph := generateRandomGraph(5, 30)
-			err = updateGraphFile("/app/static/tasks/graph.md", graph)
-			if err != nil {
-				return
-			}
-			if treeSize(tree.Root) >= 100 {
-				tree = GenerateTree(5)
-			} else {
-				key := rand.Intn(100)
-				tree.Insert(key)
-			}
-			err = updateTree("/app/static/tasks/binary.md", tree)
-			b++
-		}
-	}
-}
-
-/*gin.SetMode(gin.ReleaseMode)
-	r := chi.NewRouter()
-	s := gin.New()
-	r.Use(middleware.Logger)
-	proxy := NewReverseProxy("hugo", "1313")
-	err := os.Setenv("HOST", proxy.host)
-	if err != nil {
-		return
-	}
-	r.Use(proxy.ReverseProxy)
-
-	r.Get("/api", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Hello from API"))
-	})
-	r.Post("/api/register", register)
-	r.Post("/api/login", login)
-
-	r.Group(func(r chi.Router) {
-		r.Use(jwtauth.Verifier(tokenAuth))
-		r.Use(jwtauth.Authenticator)
-
-		r.Post("/api/address/search", Search)
-		r.Post("/api/address/geocode", geocodeAddress)
-	})
-	s.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	s.Run(":8080")
-	corsHandler := cors.Default().Handler(r)
-	go WorkerTest()
-	stopChan := make(chan os.Signal, 1)
-	signal.Notify(stopChan, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-
-	go func() {
-		log.Println("Starting server...")
-		if err = server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("Server error: %v", err)
-		}
-	}()
-		go func() {
-		err = http.ListenAndServe(":8080	", corsHandler)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	log.Println("Server started")
-
-	<-stopChan
-
-	log.Println("Shutting down server gracefully...")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	if err = server.Shutdown(ctx); err != nil {
-		log.Fatalf("Error during server shutdown: %v", err)
-	}
-
-	log.Println("Server stopped gracefully")
-}*/

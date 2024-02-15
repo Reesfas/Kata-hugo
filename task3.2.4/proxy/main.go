@@ -58,8 +58,8 @@ func main() {
 	r.Post("/api/login", login)
 
 	r.Group(func(r chi.Router) {
-		r.Use(jwtauth.Verifier(tokenAuth))
-		r.Use(jwtauth.Authenticator)
+		//	r.Use(jwtauth.Verifier(tokenAuth))
+		//	r.Use(jwtauth.Authenticator)
 
 		r.Post("/api/address/search", geocode.Search)
 		r.Post("/api/address/geocode", geocode.geocodeAddress)

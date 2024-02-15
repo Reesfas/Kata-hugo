@@ -70,15 +70,18 @@ func (g *Geo) GeocodeAddress(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
 	address, err := g.Geocoder.GeocodeAddressService(requestData.Lat, requestData.Lon)
 	if err != nil {
 		http.Error(w, "Failed to geocode", http.StatusInternalServerError)
 		return
 	}
 
-	response := service.GeocodeResponse{Addresses: []*service.Address{address}}
+	//response := service.GeocodeResponse{Addresses: []*service.Address{address}}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	err = json.NewEncoder(w).Encode(address)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 }

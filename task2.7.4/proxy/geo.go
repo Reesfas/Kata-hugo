@@ -57,8 +57,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	cleanApi := dadata.NewCleanApi(client.WithCredentialProvider(&client.Credentials{
-		ApiKeyValue:    "52a132510af242610a33fea8352874a271dbfebc",
-		SecretKeyValue: "c79449d80f97afab795c7f1eda5a746d32391831"}))
+		ApiKeyValue:    "11cb4969967b7e68ab87b57258372aefec0eb6ac",
+		SecretKeyValue: "3461265109aaa28b20523e1b4dfb4d36e475fc9f"}))
 	addresses, err1 := cleanApi.Address(context.Background(), request.Query)
 	if err1 != nil {
 		http.Error(w, "Dadata API is not available", http.StatusInternalServerError)
