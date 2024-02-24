@@ -3,23 +3,31 @@ version: '3'
 services:
   web:
     build: .
+    container_name: task342
     ports:
       - "8080:8080"
+    networks:
+      - mylocal
     depends_on:
-      - db
+     - postgres
     environment:
-      - DATABASE_URL=postgres://postgres:password@db:5432/mydatabase?sslmode=disable
-
-  db:
+      DATABASE_URL: postgres://postgres:papintank@postgres:5432/mydatabase?sslmode=disable
+  postgres:
     image: postgres:latest
     ports:
       - "5432:5432"
+    networks:
+      - mylocal
     environment:
       POSTGRES_DB: mydatabase
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: papintank
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+
 volumes:
   postgres_data:
+networks:
+  mylocal:
+    driver: bridge

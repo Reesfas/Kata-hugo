@@ -19,6 +19,8 @@ FROM alpine:latest
 # Копируем исполняемый файл и необходимые ресурсы из первой стадии
 COPY --from=builder /app/main /main
 COPY --from=builder /app/internal /internal
+COPY --from=builder /app/migrations /migrations
+COPY --from=builder /app/db.env .
 
 # Открываем порт 8080
 EXPOSE 8080

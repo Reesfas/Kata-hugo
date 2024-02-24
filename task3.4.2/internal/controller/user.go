@@ -6,6 +6,7 @@ import (
 	"hugoproxy-main/task3.4.2/internal/repository"
 	"hugoproxy-main/task3.4.2/internal/service"
 	"net/http"
+	"strconv"
 )
 
 type UserController interface {
@@ -64,7 +65,8 @@ func (u *UserContr) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	user.ID = id
+
+	user.ID, _ = strconv.Atoi(id)
 
 	err := u.serv.Update(r.Context(), user)
 	if err != nil {
