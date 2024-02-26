@@ -6,8 +6,8 @@ import (
 )
 
 type Conditions struct {
-	Limit  int
-	Offset int
+	Limit  int `json:"limit"`
+	Offset int `json:"offset"`
 }
 
 type UserRepository interface {
@@ -34,15 +34,15 @@ func NewUserRepository(db *sql.DB) *UserRep {
 }
 
 func (u *UserRep) Create(ctx context.Context, user User) error {
-	query := `INSERT INTO users (id, username) VALUES ($1, $2)`
-	_, err := u.db.ExecContext(ctx, query, user.ID, user.Name)
+	query := `INSERT INTO users (name) VALUES ($1)`
+	_, err := u.db.ExecContext(ctx, query, user.Name)
 	return err
 }
 
 func (u *UserRep) GetByID(ctx context.Context, id string) (User, error) {
 	user := User{}
 	query := `SELECT * FROM users WHERE id = $1 AND deleted = false`
-	err := u.db.QueryRowContext(ctx, string(query), id).Scan(&user.ID, &user.Name)
+	err := u.db.QueryRowContext(ctx, string(query), id).Scan(&user.ID, &user.Name, &user.Deleted)
 	if err != nil {
 		return User{}, err
 	}
@@ -50,7 +50,7 @@ func (u *UserRep) GetByID(ctx context.Context, id string) (User, error) {
 }
 
 func (u *UserRep) Update(ctx context.Context, user User) error {
-	query := `UPDATE users SET username = $2 WHERE id = $1 AND deleted = false`
+	query := `UPDATE users SET name = $2 WHERE id = $1 AND deleted = false`
 	_, err := u.db.ExecContext(ctx, query, user.ID, user.Name)
 	if err != nil {
 		return err

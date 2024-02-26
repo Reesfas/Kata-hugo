@@ -33,11 +33,11 @@ func (u *UserContr) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	err = json.NewEncoder(w).Encode(user)
-	if err != nil {
-		return
-	}
+	/*	w.WriteHeader(http.StatusCreated)
+		err = json.NewEncoder(w).Encode(user)
+		if err != nil {
+			return
+		}*/
 }
 
 func (u *UserContr) GetUser(w http.ResponseWriter, r *http.Request) {
