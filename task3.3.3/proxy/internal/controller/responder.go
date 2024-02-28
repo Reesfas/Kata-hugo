@@ -36,7 +36,7 @@ func NewResponder(decoder godecoder.Decoder, logger *zap.Logger) Responder {
 func (r *Respond) OutputJSON(w http.ResponseWriter, responseData interface{}) {
 	w.Header().Set("Content-Type", "application/json;charset=utf-8")
 	if err := r.Encode(w, responseData); err != nil {
-		r.log.Error("responder json encode error", zap.Error(err))
+		r.log.Error("repository json encode error", zap.Error(err))
 	}
 }
 
