@@ -3,10 +3,9 @@ package controller
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"hugoproxy-main/task3.4.2/internal/repository"
-	"hugoproxy-main/task3.4.2/internal/service"
 	"net/http"
-	"strconv"
+	"task3.4.3/internal/repository"
+	"task3.4.3/internal/service"
 )
 
 type UserController interface {
@@ -15,6 +14,8 @@ type UserController interface {
 	UpdateUser(w http.ResponseWriter, r *http.Request)
 	DeleteUser(w http.ResponseWriter, r *http.Request)
 	ListUsers(w http.ResponseWriter, r *http.Request)
+	Login(w http.ResponseWriter, r *http.Request)
+	Logout(w http.ResponseWriter, r *http.Request)
 }
 
 type UserContr struct {
@@ -42,9 +43,9 @@ func (u *UserContr) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 func (u *UserContr) GetUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id := vars["id"]
+	username := vars["username"]
 
-	user, err := u.serv.GetByID(r.Context(), id)
+	user, err := u.serv.GetByUsername(r.Context(), username)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -58,7 +59,7 @@ func (u *UserContr) GetUser(w http.ResponseWriter, r *http.Request) {
 
 func (u *UserContr) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id := vars["id"]
+	username := vars["username"]
 
 	var user repository.User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
@@ -66,7 +67,7 @@ func (u *UserContr) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user.ID, _ = strconv.Atoi(id)
+	user.Username = username
 
 	err := u.serv.Update(r.Context(), user)
 	if err != nil {
@@ -111,4 +112,64 @@ func (u *UserContr) ListUsers(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
+}
+
+func (u *UserContr) Login(w http.ResponseWriter, r *http.Request) {
+	var user repository.User
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		http.Error(w, "Invalid request format", http.StatusBadRequest)
+		return
+	}
+	token, err := u.serv.Login(r.Context(), user.Username, user.Password)
+	if err != nil {
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(map[string]string{"token": token})
+	if err != nil {
+		return
+	}
+}
+
+func (u *UserContr) Logout(w http.ResponseWriter, r *http.Request) {
+	c := http.Cookie{
+		Name:   "token",
+		MaxAge: -1}
+	http.SetCookie(w, &c)
+
+	_, err := w.Write([]byte("Old cookie deleted. Logged out!\n"))
+	if err != nil {
+		return
+	}
+}
+
+func (u *UserContr) CreateUserWithArray(w http.ResponseWriter, r *http.Request) {
+	var users []repository.User
+	if err := json.NewDecoder(r.Body).Decode(&users); err != nil {
+		http.Error(w, "Failed to decode request body", http.StatusBadRequest)
+		return
+	}
+
+	if err := u.serv.CreateUserWithArray(users); err != nil {
+		http.Error(w, "Failed to create users", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+}
+
+func (u *UserContr) CreateUserWithList(w http.ResponseWriter, r *http.Request) {
+	var users []repository.User
+	if err := json.NewDecoder(r.Body).Decode(&users); err != nil {
+		http.Error(w, "Failed to decode request body", http.StatusBadRequest)
+		return
+	}
+
+	if err := u.serv.CreateUserWithList(users); err != nil {
+		http.Error(w, "Failed to create users", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
 }

@@ -18,6 +18,7 @@ type OrderRepository interface {
 	Create(ctx context.Context, order Order) error
 	GetByID(ctx context.Context, id string) (Order, error)
 	Delete(ctx context.Context, id string) error
+	GetInventory(ctx context.Context) (map[string]int, error)
 }
 
 type OrderRep struct {
