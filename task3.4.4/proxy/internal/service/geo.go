@@ -72,6 +72,7 @@ func (g *GeocodeService) SearchService(request SearchRequest) ([]*Address, error
 	for i, a := range addresses {
 		result[i] = &Address{Lat: a.GeoLat, Lon: a.GeoLon}
 	}
+	g.repo.SaveAddress(result[0].AddressText, result[0].Lat, result[0].Lon)
 	return result, nil
 }
 

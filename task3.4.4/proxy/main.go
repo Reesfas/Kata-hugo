@@ -1,17 +1,21 @@
 package main
 
 import (
+	"database/sql"
 	"errors"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/jwtauth"
+	"github.com/joho/godotenv"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/pressly/goose/v3"
 	"github.com/ptflp/godecoder"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"gitlab.com/ptflp/goboilerplate/config"
 	"golang.org/x/net/context"
 	_ "hugoproxy-main/task3.3.3/proxy/docs"
 	"hugoproxy-main/task3.3.3/proxy/internal/controller"
+	"hugoproxy-main/task3.3.3/proxy/internal/repository"
 	"hugoproxy-main/task3.3.3/proxy/internal/service"
 	"log"
 	"net/http"
@@ -33,23 +37,45 @@ func init() {
 // @host localhost:8000
 // @BasePath /
 func main() {
+	err1 := godotenv.Load("db.env")
+	if err1 != nil {
+		log.Fatal("Ошибка загрузки файла .env")
+	}
+
+	db, err := sql.Open("postgres", "user="+os.Getenv("DB_USER")+" password="+os.Getenv("DB_PASSWORD")+" dbname="+os.Getenv("DB_NAME")+" host="+os.Getenv("DB_HOST")+" port="+os.Getenv("DB_PORT")+" sslmode=disable")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = db.Ping()
+	if err != nil {
+		log.Fatalf("Some shit with database %v", err)
+	}
+	dir := "./migrations"
+
+	if err = goose.Up(db, dir); err != nil {
+		log.Fatalf("failed to apply migrations: %v", err)
+	}
+
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	proxy := NewReverseProxy("hugo", "1313")
-	err := os.Setenv("HOST", proxy.host)
+	err = os.Setenv("HOST", proxy.host)
 	if err != nil {
 		return
 	}
+
 	decoder := godecoder.NewDecoder(jsoniter.Config{
 		EscapeHTML:             true,
 		SortMapKeys:            true,
 		ValidateJsonRawMessage: true,
 		DisallowUnknownFields:  true,
 	})
+
 	conf := config.NewAppConf()
 	logger := NewLogger(conf, os.Stdout)
 	resp := controller.NewResponder(decoder, logger)
-	geo := service.NewGeoSerive()
+	repo := repository.NewGeoRep(db)
+	geo := service.NewGeoSerive(repo)
 	geocode := controller.NewGeo(geo, resp)
 	r.Use(proxy.ReverseProxy)
 	r.Get("/swagger/*", httpSwagger.Handler())

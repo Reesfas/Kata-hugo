@@ -22,7 +22,6 @@ func main() {
 	}
 
 	db, err := sql.Open("postgres", "user="+os.Getenv("DB_USER")+" password="+os.Getenv("DB_PASSWORD")+" dbname="+os.Getenv("DB_NAME")+" host="+os.Getenv("DB_HOST")+" port="+os.Getenv("DB_PORT")+" sslmode=disable")
-	//db, err := sql.Open("postgres", "user="+os.Getenv("DB_USER")+" password="+os.Getenv("DB_PASSWORD")+" dbname="+os.Getenv("DB_NAME")+" sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -30,10 +29,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("Some shit with database %v", err)
 	}
-	// Путь к каталогу с миграциями
 	dir := "./migrations"
 
-	// Применяем миграции
 	if err = goose.Up(db, dir); err != nil {
 		log.Fatalf("failed to apply migrations: %v", err)
 	}
