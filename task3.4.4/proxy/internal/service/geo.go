@@ -48,15 +48,18 @@ func NewGeoSerive(repo repository.GeocoderRepository) *GeocodeService {
 }
 
 func (g *GeocodeService) SearchService(request SearchRequest) ([]*Address, error) {
+	historyID, err := g.repo.SaveSearchHistory(request.Query)
+	if err != nil {
+		return nil, err
+	}
 	similarAddresses, err := g.repo.Search(request.Query)
 	if err != nil {
 		return nil, err
 	}
-
 	if len(similarAddresses) > 0 {
 		addresses := make([]*Address, len(similarAddresses))
 		for i, addr := range similarAddresses {
-			addresses[i] = &Address{AddressText: addr}
+			addresses[i] = &addr
 		}
 		return addresses, nil
 	}
@@ -71,8 +74,12 @@ func (g *GeocodeService) SearchService(request SearchRequest) ([]*Address, error
 	result := make([]*Address, len(addresses))
 	for i, a := range addresses {
 		result[i] = &Address{Lat: a.GeoLat, Lon: a.GeoLon}
+		adressID, err := g.repo.SaveAddress(request.Query, a.GeoLat, a.GeoLon)
+		g.repo.SaveHistorySearchAddress(historyID, adressID)
+		if err != nil {
+			return nil, err
+		}
 	}
-	g.repo.SaveAddress(result[0].AddressText, result[0].Lat, result[0].Lon)
 	return result, nil
 }
 

@@ -2,14 +2,15 @@ package repository
 
 import (
 	"database/sql"
-	"github.com/texttheater/golang-levenshtein/levenshtein"
+	"hugoproxy-main/task3.3.3/proxy/internal/service"
 )
 
 type GeocoderRepository interface {
-	Search(query string) ([]string, error)
+	Search(query string) ([]service.Address, error)
 	CheckAddressExistence(query string) (bool, error)
-	SaveSearchHistory(query string) error
+	SaveSearchHistory(query string) (int, error)
 	SaveAddress(addressText string, lat, lon string) (int, error)
+	SaveHistorySearchAddress(historyID, addressID int) error
 }
 
 type GeocodeRep struct {
@@ -20,28 +21,19 @@ func NewGeoRep(db *sql.DB) *GeocodeRep {
 	return &GeocodeRep{db}
 }
 
-func (r *GeocodeRep) Search(query string) ([]string, error) {
-	var similarAddresses []string
-
-	rows, err := r.db.Query("SELECT address_text FROM address")
+func (r *GeocodeRep) Search(query string) ([]service.Address, error) {
+	var similarAddresses []service.Address
+	var address service.Address
+	rows, err := r.db.Query("SELECT * FROM address WHERE levenshtein(address_text, $1) <= LENGTH('$1') * 0.7;", query)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-
 	for rows.Next() {
-		var addressText string
-		if err = rows.Scan(&addressText); err != nil {
+		if err = rows.Scan(&address.AddressText, &address.Lat, &address.Lat); err != nil {
 			return nil, err
 		}
-
-		distance := levenshtein.RatioForStrings([]rune(query), []rune(addressText), levenshtein.DefaultOptions)
-
-		if distance > 0.7 {
-			similarAddresses = append(similarAddresses, addressText)
-		}
 	}
-
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
@@ -60,13 +52,14 @@ func (r *GeocodeRep) CheckAddressExistence(query string) (bool, error) {
 }
 
 // SaveSearchHistory Метод для сохранения истории поиска
-func (r *GeocodeRep) SaveSearchHistory(query string) error {
-	_, err := r.db.Exec("INSERT INTO search_history (query) VALUES ($1)", query)
-	return err
+func (r *GeocodeRep) SaveSearchHistory(query string) (int, error) {
+	var historyID int
+	err := r.db.QueryRow("INSERT INTO search_history (query) VALUES ($1) RETURNING id", query).Scan(&historyID)
+	return historyID, err
 }
 
 // SaveAddress Метод для сохранения адреса
-func (r *GeocodeRep) SaveAddress(addressText string, lat, lon float64) (int, error) {
+func (r *GeocodeRep) SaveAddress(addressText string, lat, lon string) (int, error) {
 	var addressID int
 	err := r.db.QueryRow("INSERT INTO address (address_text, geo_lat, geo_lon) VALUES ($1, $2, $3) RETURNING id", addressText, lat, lon).Scan(&addressID)
 	if err != nil {

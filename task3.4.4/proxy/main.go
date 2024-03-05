@@ -46,12 +46,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = db.Ping()
-	if err != nil {
-		log.Fatalf("Some shit with database %v", err)
-	}
-	dir := "./migrations"
 
+	dir := "./migrations"
 	if err = goose.Up(db, dir); err != nil {
 		log.Fatalf("failed to apply migrations: %v", err)
 	}
@@ -114,7 +110,7 @@ func main() {
 		close(stop)
 	}()
 	log.Println("Сервер на порту :8080 открыт")
-	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+	if err = server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatalf("Server error: %v", err)
 	}
 	<-stop

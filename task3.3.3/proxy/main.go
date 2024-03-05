@@ -88,7 +88,7 @@ func main() {
 		close(stop)
 	}()
 	log.Println("Сервер на порту :8080 открыт")
-	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+	if err = server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatalf("Server error: %v", err)
 	}
 	<-stop
