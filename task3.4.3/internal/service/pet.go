@@ -23,7 +23,7 @@ type PetServ struct {
 	repo repository.PetRepository
 }
 
-func NewPetRep(pet repository.PetRepository) *PetServ {
+func NewPetServ(pet repository.PetRepository) *PetServ {
 	return &PetServ{repo: pet}
 }
 func (s *PetServ) Create(ctx context.Context, pet repository.Pet) error {

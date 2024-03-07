@@ -30,7 +30,6 @@ type PetRepository interface {
 	Create(ctx context.Context, pet Pet) error
 	GetByID(ctx context.Context, id string) (Pet, error)
 	GetByStatus(ctx context.Context, status string) (Pet, error)
-	//UploadImages()
 	FullUpdate(ctx context.Context, pet Pet) error
 	PartialUpdate(ctx context.Context, pet Pet) error
 	Delete(ctx context.Context, id string) error
@@ -40,8 +39,8 @@ type PetRep struct {
 	db *sql.DB
 }
 
-func NewPetRep(db *sql.DB) PetRep {
-	return PetRep{db: db}
+func NewPetRep(db *sql.DB) *PetRep {
+	return &PetRep{db: db}
 }
 
 func (p *PetRep) Create(ctx context.Context, pet Pet) error {

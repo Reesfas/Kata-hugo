@@ -16,5 +16,6 @@ require (
 	github.com/lestrrat-go/jwx v1.2.28 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/urfave/negroni v1.0.0 // indirect
 	golang.org/x/crypto v0.17.0 // indirect
 )

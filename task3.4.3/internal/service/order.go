@@ -16,8 +16,8 @@ type OrderServ struct {
 	repo repository.OrderRepository
 }
 
-func NewOrderServ(repo repository.OrderRepository) OrderServ {
-	return OrderServ{repo: repo}
+func NewOrderServ(repo repository.OrderRepository) *OrderServ {
+	return &OrderServ{repo: repo}
 }
 
 func (o *OrderServ) Create(ctx context.Context, order repository.Order) error {

@@ -25,8 +25,8 @@ type OrderRep struct {
 	db *sql.DB
 }
 
-func NewOrderRep(db *sql.DB) OrderRep {
-	return OrderRep{db: db}
+func NewOrderRep(db *sql.DB) *OrderRep {
+	return &OrderRep{db: db}
 }
 
 func (o *OrderRep) Create(ctx context.Context, order Order) error {
