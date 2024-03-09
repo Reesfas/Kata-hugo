@@ -3,8 +3,8 @@ package controller
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"hugoproxy-main/task3.4.2/internal/repository"
-	"hugoproxy-main/task3.4.2/internal/service"
+	"hugo/task3.4.2/internal/repository"
+	"hugo/task3.4.2/internal/service"
 	"net/http"
 	"strconv"
 )

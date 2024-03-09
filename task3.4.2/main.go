@@ -7,9 +7,9 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose/v3"
-	"hugoproxy-main/task3.4.2/internal/controller"
-	"hugoproxy-main/task3.4.2/internal/repository"
-	"hugoproxy-main/task3.4.2/internal/service"
+	"hugo/task3.4.2/internal/controller"
+	"hugo/task3.4.2/internal/repository"
+	"hugo/task3.4.2/internal/service"
 	"log"
 	"net/http"
 	"os"
@@ -27,7 +27,7 @@ func main() {
 	}
 	err = db.Ping()
 	if err != nil {
-		log.Fatalf("Some shit with database %v", err)
+		log.Fatalf("Something wrong with database %v", err)
 	}
 	dir := "./migrations"
 

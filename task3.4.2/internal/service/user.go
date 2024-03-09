@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"hugoproxy-main/task3.4.2/internal/repository"
+	"hugo/task3.4.2/internal/repository"
 )
 
 // Как я понимаю, тут должны быть какие-то бизнес логики типа валидации данных, но у нас в задании ничего нет поэтому просто он вызывает методы репозитория

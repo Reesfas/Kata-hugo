@@ -1,4 +1,4 @@
-module hugoproxy-main/task3.4.2
+module hugo/task3.4.2
 
 go 1.19
 

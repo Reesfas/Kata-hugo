@@ -96,8 +96,7 @@ func authMiddleware(next http.Handler) http.Handler {
 		tokenString := bearerToken[1]
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			// Здесь вы должны вернуть ключ проверки подписи (signing key)
-			return []byte("your-secret-key"), nil
+			return []byte("secret"), nil
 		})
 		if err != nil {
 			http.Error(w, "Failed to parse token", http.StatusUnauthorized)
