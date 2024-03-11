@@ -1,8 +1,8 @@
 package service
 
 import (
-	"1.19/internal/repository"
 	"errors"
+	"task354/internal/repository"
 )
 
 type User struct {
@@ -56,18 +56,6 @@ func (s *LibraryService) ReturnBook(bookID, userID int) error {
 	return nil
 }
 
-func (s *LibraryService) AddAuthor(name string) {
-	s.AuthorRepository.AddAuthor(name)
-}
-
-func (s *LibraryService) GetAuthorsWithBooks() ([]Authors, error) {
-	authors, err := s.AuthorRepository.GetAuthorsWithBooks()
-	if err != nil {
-		return nil, err
-	}
-	return authors, err
-}
-
 func (s *LibraryService) AddBook(title string, authorId int) error {
 	err := s.BookRepository.AddBook(title, authorId)
 	if err != nil {
@@ -84,14 +72,34 @@ func (s *LibraryService) GetAllBooks() ([]Book, error) {
 	return books, nil
 }
 
+func (s *LibraryService) AddAuthor(name string) {
+	s.AuthorRepository.AddAuthor(name)
+}
+
+func (s *LibraryService) GetAuthorsWithBooks() ([]Authors, error) {
+	authors, err := s.AuthorRepository.GetAuthorsWithBooks()
+	if err != nil {
+		return nil, err
+	}
+	return authors, err
+}
+
+func (s *LibraryService) GetTopAuthors(limit int) ([]Authors, error) {
+	return s.AuthorRepository.GetTopAuthors(limit)
+}
+
+func (s *LibraryService) CreateUser(name string) error {
+	err := s.UserRepository.CreateUser(name)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *LibraryService) GetUsers() ([]User, error) {
 	books, err := s.UserRepository.GetUsersWithRentedBooks()
 	if err != nil {
 		return nil, err
 	}
 	return books, nil
-}
-
-func (s *LibraryService) GetTopAuthors(limit int) ([]Authors, error) {
-	return s.AuthorRepository.GetTopAuthors(limit)
 }
