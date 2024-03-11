@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  server:
+    image: klakegg/hugo:0.101.0-ext-alpine
+    container_name: hugo
+    command: server
+    entrypoint: hugo
+    volumes:
+      - "./hugo:/src"
+    ports:
+      - "1313:1313"
+    networks:
+        - mylocal
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    networks:
+      - mylocal
+    environment:
+      POSTGRES_DB: mydatabase
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: papintank
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  app:
+    build: ./proxy
+    container_name: proxy
+    volumes:
+      - "./hugo/content:/app/static"
+    ports:
+      - "8080:8080"
+    networks:
+        - mylocal
+volumes:
+  postgres_data:
+networks:
+    mylocal:
+        driver: bridge

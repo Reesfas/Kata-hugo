@@ -1,0 +1,119 @@
+basePath: /
+definitions:
+  main.Address:
+    properties:
+      lat:
+        type: string
+      lon:
+        type: string
+    type: object
+  main.GeocodeRequest:
+    properties:
+      lat:
+        type: string
+      lng:
+        type: string
+    type: object
+  main.GeocodeResponse:
+    properties:
+      addresses:
+        items:
+          $ref: '#/definitions/main.Address'
+        type: array
+    type: object
+  main.SearchRequest:
+    properties:
+      query:
+        type: string
+    type: object
+  main.SearchResponse:
+    properties:
+      addresses:
+        items:
+          $ref: '#/definitions/main.Address'
+        type: array
+    type: object
+host: localhost:8000
+info:
+  contact: {}
+  description: Your API description. You can use Markdown here.
+  title: Your API Title
+  version: "1.0"
+paths:
+  /api/address/geocode:
+    post:
+      description: Позволяет выполнить геокодирование по заданным координатам.
+      operationId: geocodeAddress
+      parameters:
+      - description: Запрос на геокодирование
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.GeocodeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ
+          schema:
+            $ref: '#/definitions/main.GeocodeResponse'
+        "400":
+          description: Неверный формат запроса
+          schema:
+            type: string
+      summary: Геокодирование координат.
+      tags:
+      - address
+  /api/address/search:
+    post:
+      description: Позволяет найти адрес по заданному запросу, используя Dadata API.
+      operationId: searchAddress
+      parameters:
+      - description: Запрос на поиск адреса
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.SearchRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ
+          schema:
+            $ref: '#/definitions/main.SearchResponse'
+        "400":
+          description: Неверный формат запроса
+          schema:
+            type: string
+        "500":
+          description: Dadata API недоступен
+          schema:
+            type: string
+      summary: Поиск адреса по запросу.
+      tags:
+      - address
+  /api/login:
+    post:
+      consumes:
+      - application/json
+      description: Позволяет пользователям войти в систему и получить JWT-токен.
+      produces:
+      - application/json
+      responses: {}
+      summary: Вход пользователя
+      tags:
+      - auth
+  /api/register:
+    post:
+      consumes:
+      - application/json
+      description: Позволяет пользователям зарегистрироваться и получить JWT-токен.
+      produces:
+      - application/json
+      responses: {}
+      summary: Регистрация пользователя
+      tags:
+      - auth
+swagger: "2.0"
