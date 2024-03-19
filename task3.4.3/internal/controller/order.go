@@ -23,6 +23,16 @@ func NewOrderRep(serv service.OrderService) OrderContr {
 	return OrderContr{serv}
 }
 
+// Create
+// @Summary Create an order
+// @Description Create a new order in the store
+// @Accept json
+// @Produce json
+// @Param order body Order true "Order object that needs to be added to the store"
+// @Success 200 {object} string "Successful operation"
+// @Failure 400 {string} string "Invalid order data"
+// @Failure 500 {string} string "Internal server error"
+// @Router /store/order [post]
 func (o *OrderContr) Create(w http.ResponseWriter, r *http.Request) {
 	var order repository.Order
 	if err := json.NewDecoder(r.Body).Decode(&order); err != nil {
@@ -37,6 +47,14 @@ func (o *OrderContr) Create(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetByID
+// @Summary Get order by ID
+// @Description Get order information by ID
+// @Produce json
+// @Param orderId path string true "ID of the order to get"
+// @Success 200 {object} Order "Successful operation"
+// @Failure 404 {string} string "Order not found"
+// @Router /store/order/{orderId} [get]
 func (o *OrderContr) GetByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -53,6 +71,13 @@ func (o *OrderContr) GetByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Delete
+// @Summary Delete order by ID
+// @Description Delete order by ID
+// @Param orderId path string true "ID of the order to delete"
+// @Success 204 "No Content"
+// @Failure 500 {string} string "Internal server error"
+// @Router /store/order/{orderId} [delete]
 func (o *OrderContr) Delete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -66,6 +91,13 @@ func (o *OrderContr) Delete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// GetInventory
+// @Summary Get inventory
+// @Description Get inventory of the store
+// @Produce json
+// @Success 200 {object} object "Successful operation"
+// @Failure 500 {string} string "Internal server error"
+// @Router /store/inventory [get]
 func (o *OrderContr) GetInventory(w http.ResponseWriter, r *http.Request) {
 
 	inventory, err := o.serv.GetInventory(r.Context())

@@ -26,6 +26,16 @@ func NewUserController(userService service.UserService) *UserContr {
 	return &UserContr{userService}
 }
 
+// CreateUser
+// @Summary Create user
+// @Description Create a new user
+// @Accept json
+// @Produce json
+// @Param user body User true "User object that needs to be added"
+// @Success 200 {object} string "Successful operation"
+// @Failure 400 {string} string "Invalid user data"
+// @Failure 500 {string} string "Internal server error"
+// @Router /user [post]
 func (u *UserContr) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var user repository.User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
@@ -41,6 +51,14 @@ func (u *UserContr) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// GetUser
+// @Summary Get user by username
+// @Description Get user information by username
+// @Produce json
+// @Param username path string true "Username of the user to get"
+// @Success 200 {object} User "Successful operation"
+// @Failure 404 {string} string "User not found"
+// @Router /user/{username} [get]
 func (u *UserContr) GetUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	username := vars["username"]
@@ -57,6 +75,17 @@ func (u *UserContr) GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// UpdateUser
+// @Summary Update user
+// @Description Update an existing user
+// @Accept json
+// @Produce json
+// @Param username path string true "Username of the user to update"
+// @Param user body User true "User object with updated information"
+// @Success 200 {object} User "Successful operation"
+// @Failure 400 {string} string "Invalid user data"
+// @Failure 500 {string} string "Internal server error"
+// @Router /user/{username} [put]
 func (u *UserContr) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	username := vars["username"]
@@ -81,6 +110,13 @@ func (u *UserContr) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// DeleteUser
+// @Summary Delete user
+// @Description Delete user by username
+// @Param username path string true "Username of the user to delete"
+// @Success 204 "No Content"
+// @Failure 500 {string} string "Internal server error"
+// @Router /user/{username} [delete]
 func (u *UserContr) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -94,6 +130,16 @@ func (u *UserContr) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// ListUsers
+// @Summary List users with given conditions
+// @Description List users based on provided conditions
+// @Accept json
+// @Produce json
+// @Param conditions body Conditions true "Conditions for filtering users"
+// @Success 200 {array} User "Successful operation"
+// @Failure 400 {string} string "Invalid request body"
+// @Failure 500 {string} string "Internal server error"
+// @Router /user/createWithList [post]
 func (u *UserContr) ListUsers(w http.ResponseWriter, r *http.Request) {
 	var c repository.Conditions
 
@@ -114,6 +160,17 @@ func (u *UserContr) ListUsers(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Login
+// @Summary User login
+// @Description Logs user into the system
+// @Accept json
+// @Produce json
+// @Param username body string true "Username for login"
+// @Param password body string true "Password for login"
+// @Success 200 {object} string "Successful operation"
+// @Failure 400 {string} string "Invalid request format"
+// @Failure 500 {string} string "Internal server error"
+// @Router /user/login [get]
 func (u *UserContr) Login(w http.ResponseWriter, r *http.Request) {
 	var user repository.User
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -132,18 +189,33 @@ func (u *UserContr) Login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Logout
+// @Summary User logout
+// @Description Logs out current logged in user session
+// @Success 200 {string} string "Old cookie deleted. Logged out!"
+// @Router /user/logout [get]
 func (u *UserContr) Logout(w http.ResponseWriter, r *http.Request) {
 	c := http.Cookie{
 		Name:   "token",
 		MaxAge: -1}
 	http.SetCookie(w, &c)
 
-	_, err := w.Write([]byte("Old cookie deleted. Logged out!\n"))
+	_, err := w.Write([]byte("Logged out!\n"))
 	if err != nil {
 		return
 	}
 }
 
+// CreateUserWithArray
+// @Summary Create users with array input
+// @Description Creates new users with an array of user objects
+// @Accept json
+// @Produce json
+// @Param users body []User true "Array of user objects to create"
+// @Success 201 "Created"
+// @Failure 400 {string} string "Failed to decode request body"
+// @Failure 500 {string} string "Failed to create users"
+// @Router /user/createWithArray [post]
 func (u *UserContr) CreateUserWithArray(w http.ResponseWriter, r *http.Request) {
 	var users []repository.User
 	if err := json.NewDecoder(r.Body).Decode(&users); err != nil {
@@ -159,6 +231,16 @@ func (u *UserContr) CreateUserWithArray(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusCreated)
 }
 
+// CreateUserWithList
+// @Summary Create users with list input
+// @Description Creates new users with a list of user objects
+// @Accept json
+// @Produce json
+// @Param users body []User true "List of user objects to create"
+// @Success 201 "Created"
+// @Failure 400 {string} string "Failed to decode request body"
+// @Failure 500 {string} string "Failed to create users"
+// @Router /user/createWithList [post]
 func (u *UserContr) CreateUserWithList(w http.ResponseWriter, r *http.Request) {
 	var users []repository.User
 	if err := json.NewDecoder(r.Body).Decode(&users); err != nil {
