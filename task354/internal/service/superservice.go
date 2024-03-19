@@ -24,27 +24,45 @@ type Authors struct {
 	Books []Book
 }
 
+type LibService interface {
+	RentBook(userID, bookID int) error
+	ReturnBook(bookID, userID int) error
+	AddBook(title string, authorID int) error
+	GetAllBooks() ([]Book, error)
+	AddAuthor(name string)
+	GetAuthorsWithBooks() ([]Authors, error)
+	GetTopAuthors(limit int) ([]Authors, error)
+	CreateUser(name string) error
+	GetUsers() ([]User, error)
+}
+
 type LibraryService struct {
-	UserRepository   repository.UserRepository
-	BookRepository   repository.BookRepository
-	AuthorRepository repository.AuthorRepository
-	RentalRepository repository.RentalRepository
+	UserRepository   *repository.UserRepository
+	BookRepository   *repository.BookRepository
+	AuthorRepository *repository.AuthorRepository
+	RentalRepository *repository.RentalRepository
+}
+
+func NewLibraryService(userRepo *repository.UserRepository, bookRepo *repository.BookRepository, authorRepo *repository.AuthorRepository, rentalRepo *repository.RentalRepository) *LibraryService {
+	return &LibraryService{
+		UserRepository:   userRepo,
+		BookRepository:   bookRepo,
+		AuthorRepository: authorRepo,
+		RentalRepository: rentalRepo,
+	}
 }
 
 func (s *LibraryService) RentBook(userID, bookID int) error {
-	// Проверка существования пользователя
 	_, err := s.UserRepository.GetUserByID(userID)
 	if err != nil {
 		return errors.New("user not found")
 	}
 
-	// Проверка существования книги
 	_, err = s.BookRepository.GetBookByID(bookID)
 	if err != nil {
 		return errors.New("book not found")
 	}
 
-	// Если все проверки прошли успешно, арендуем книгу
 	return s.RentalRepository.RentBook(bookID, userID)
 }
 

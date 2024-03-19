@@ -1,0 +1,247 @@
+definitions:
+  service.Authors:
+    properties:
+      books:
+        items:
+          $ref: '#/definitions/service.Book'
+        type: array
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  service.Book:
+    properties:
+      author:
+        $ref: '#/definitions/service.Authors'
+      id:
+        type: integer
+      rented:
+        type: boolean
+      title:
+        type: string
+    type: object
+  service.User:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      rentedBooks:
+        items:
+          $ref: '#/definitions/service.Book'
+        type: array
+    type: object
+info:
+  contact: {}
+paths:
+  /authors:
+    get:
+      description: Returns a list of authors with their associated books.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/service.Authors'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get list of authors
+      tags:
+      - Authors
+    post:
+      consumes:
+      - application/json
+      description: Adds a new author to the system.
+      parameters:
+      - description: Author object that needs to be added
+        in: body
+        name: author
+        required: true
+        schema:
+          $ref: '#/definitions/service.Authors'
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Add a new author
+      tags:
+      - Authors
+  /authors/{limit}:
+    get:
+      description: Returns the top authors based on the given limit.
+      parameters:
+      - description: Limit of authors to be returned
+        in: path
+        name: limit
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Get top authors
+      tags:
+      - Authors
+  /books:
+    get:
+      description: Returns a list of books.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/service.Book'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get list of books
+      tags:
+      - Books
+    post:
+      consumes:
+      - application/json
+      description: Adds a new book to the system.
+      parameters:
+      - description: Book object that needs to be added
+        in: body
+        name: book
+        required: true
+        schema:
+          $ref: '#/definitions/service.Book'
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Add a new book
+      tags:
+      - Books
+  /books/rent:
+    post:
+      consumes:
+      - application/json
+      description: Allows a user to rent a book by providing the user ID and book
+        ID.
+      parameters:
+      - description: User ID for renting a book
+        in: body
+        name: UserID
+        required: true
+        schema:
+          type: integer
+      - description: Book ID for renting a book
+        in: body
+        name: BookID
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Rent a book
+      tags:
+      - Books
+  /books/return:
+    post:
+      consumes:
+      - application/json
+      description: Allows a user to return a book by providing the user ID and book
+        ID.
+      parameters:
+      - description: User ID for returning a book
+        in: body
+        name: UserID
+        required: true
+        schema:
+          type: integer
+      - description: Book ID for returning a book
+        in: body
+        name: BookID
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Return a book
+      tags:
+      - Books
+  /users:
+    get:
+      description: Returns a list of users.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/service.User'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get list of users
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      description: Adds a new user to the system.
+      parameters:
+      - description: User object that needs to be added
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/service.User'
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Add a new user
+      tags:
+      - Users
+swagger: "2.0"

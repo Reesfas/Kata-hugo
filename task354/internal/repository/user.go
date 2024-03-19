@@ -1,13 +1,23 @@
 package repository
 
 import (
-	"1.19/internal/service"
 	"database/sql"
 	"errors"
+	"task354/internal/service"
 )
+
+type UserRepositoryInterface interface {
+	CreateUser(name string) error
+	GetUserByID(userID int) (*service.User, error)
+	GetUsersWithRentedBooks() ([]service.User, error)
+}
 
 type UserRepository struct {
 	*sql.DB
+}
+
+func NewUserRepository(db *sql.DB) *UserRepository {
+	return &UserRepository{DB: db}
 }
 
 func (r *UserRepository) CreateUser(name string) error {

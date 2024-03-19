@@ -1,9 +1,19 @@
 package repository
 
 import (
-	"1.19/internal/service"
 	"database/sql"
+	"task354/internal/service"
 )
+
+type AuthorRepositoryInterface interface {
+	AddAuthor(name string) (int, error)
+	GetAuthorsWithBooks() ([]service.Authors, error)
+	GetTopAuthors(limit int) ([]service.Authors, error)
+}
+
+func NewAuthorRepository(db *sql.DB) *AuthorRepository {
+	return &AuthorRepository{DB: db}
+}
 
 type AuthorRepository struct {
 	*sql.DB
@@ -83,7 +93,6 @@ func (r *AuthorRepository) GetAuthorsWithBooks() ([]service.Authors, error) {
 }
 
 func (r *AuthorRepository) GetTopAuthors(limit int) ([]service.Authors, error) {
-	// Запрос для получения топа читаемых авторов
 	query := `
 		SELECT a.ID, a.Name, COUNT(b.ID) AS BookCount
 		FROM Authors a

@@ -24,7 +24,7 @@ func NewFacadeController(facade *service.Facade) *FacadeController {
 // @Description Returns a list of users.
 // @Tags Users
 // @Produce json
-// @Success 200 {array} User
+// @Success 200 {array} service.User
 // @Failure 500 {string} string "Internal Server Error"
 // @Router /users [get]
 func (c *FacadeController) UsersList(w http.ResponseWriter, r *http.Request) {
@@ -41,7 +41,7 @@ func (c *FacadeController) UsersList(w http.ResponseWriter, r *http.Request) {
 // @Description Adds a new user to the system.
 // @Tags Users
 // @Accept json
-// @Param user body User true "User object that needs to be added"
+// @Param user body service.User true "User object that needs to be added"
 // @Success 200 {string} string "OK"
 // @Failure 400 {string} string "Bad Request"
 // @Router /users [post]
@@ -75,7 +75,7 @@ func (c *FacadeController) AuthorsTop(w http.ResponseWriter, r *http.Request) {
 // @Description Returns a list of authors with their associated books.
 // @Tags Authors
 // @Produce json
-// @Success 200 {array} Authors
+// @Success 200 {array} service.Authors
 // @Failure 500 {string} string "Internal Server Error"
 // @Router /authors [get]
 func (c *FacadeController) AuthorsList(w http.ResponseWriter, r *http.Request) {
@@ -92,7 +92,7 @@ func (c *FacadeController) AuthorsList(w http.ResponseWriter, r *http.Request) {
 // @Description Adds a new author to the system.
 // @Tags Authors
 // @Accept json
-// @Param author body Authors true "Author object that needs to be added"
+// @Param author body service.Authors true "Author object that needs to be added"
 // @Success 200 {string} string "OK"
 // @Failure 400 {string} string "Bad Request"
 // @Router /authors [post]
@@ -112,7 +112,8 @@ func (c *FacadeController) AuthorAdd(w http.ResponseWriter, r *http.Request) {
 // @Description Allows a user to rent a book by providing the user ID and book ID.
 // @Tags Books
 // @Accept json
-// @Param request body RentRequest true "User ID and Book ID for renting a book"
+// @Param UserID body int true "User ID for renting a book"
+// @Param BookID body int true "Book ID for renting a book"
 // @Success 200 {string} string "OK"
 // @Failure 400 {string} string "Bad Request"
 // @Router /books/rent [post]
@@ -145,7 +146,8 @@ func (c *FacadeController) BookRent(w http.ResponseWriter, r *http.Request) {
 // @Description Allows a user to return a book by providing the user ID and book ID.
 // @Tags Books
 // @Accept json
-// @Param request body ReturnRequest true "User ID and Book ID for returning a book"
+// @Param UserID body int true "User ID for returning a book"
+// @Param BookID body int true "Book ID for returning a book"
 // @Success 200 {string} string "OK"
 // @Failure 400 {string} string "Bad Request"
 // @Failure 500 {string} string "Internal Server Error"
@@ -183,7 +185,7 @@ func (c *FacadeController) BookReturn(w http.ResponseWriter, r *http.Request) {
 // @Description Returns a list of books.
 // @Tags Books
 // @Produce json
-// @Success 200 {array} Book
+// @Success 200 {array} service.Book
 // @Failure 500 {string} string "Internal Server Error"
 // @Router /books [get]
 func (c *FacadeController) BookList(w http.ResponseWriter, r *http.Request) {
@@ -200,7 +202,7 @@ func (c *FacadeController) BookList(w http.ResponseWriter, r *http.Request) {
 // @Description Adds a new book to the system.
 // @Tags Books
 // @Accept json
-// @Param book body Book true "Book object that needs to be added"
+// @Param book body service.Book true "Book object that needs to be added"
 // @Success 200 {string} string "OK"
 // @Failure 400 {string} string "Bad Request"
 // @Router /books [post]

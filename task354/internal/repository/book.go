@@ -1,9 +1,9 @@
 package repository
 
 import (
-	"1.19/internal/service"
 	"database/sql"
 	"errors"
+	"task354/internal/service"
 )
 
 type BookRentalCount struct {
@@ -11,8 +11,18 @@ type BookRentalCount struct {
 	RentalCount int
 }
 
+type BookRepositoryInterface interface {
+	GetBookByID(bookID int) (*service.Book, error)
+	AddBook(title string, authorID int) error
+	GetAllBooks() ([]service.Book, error)
+}
+
 type BookRepository struct {
-	*sql.DB
+	DB *sql.DB
+}
+
+func NewBookRepository(db *sql.DB) *BookRepository {
+	return &BookRepository{DB: db}
 }
 
 func (r *BookRepository) GetBookByID(bookID int) (*service.Book, error) {

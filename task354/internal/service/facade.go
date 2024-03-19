@@ -1,7 +1,23 @@
 package service
 
+type LibraryFacade interface {
+	UsersList() ([]User, error)
+	UserAdd(username string)
+	AuthorsTop(limit int)
+	AuthorsList() ([]Authors, error)
+	AuthorAdd(name string)
+	BookRent(userID int, bookID int)
+	BookReturn(userID int, bookID int) error
+	BookList() ([]Book, error)
+	BookAdd(title string, authorID int)
+}
+
 type Facade struct {
 	lib *LibraryService
+}
+
+func NewFacade(lib *LibraryService) *Facade {
+	return &Facade{lib: lib}
 }
 
 func (f *Facade) UsersList() ([]User, error) {
