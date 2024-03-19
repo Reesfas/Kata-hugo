@@ -1,8 +1,8 @@
 FROM golang:1.19.1-alpine3.15 AS builder
-COPY geotask /go/src/geotask
-WORKDIR /go/src/geotask
+COPY . /go/src/gitlab.com/ptflp/geotask
+WORKDIR /go/src/gitlab.com/ptflp/geotask
 # Create slimest possible image
-RUN go build -ldflags="-w -s" -o /go/bin/server /go/src/geotask/cmd/api
+RUN go build -ldflags="-w -s" -o /go/bin/server /go/src/gitlab.com/ptflp/geotask/cmd/api
 
 FROM alpine:3.15
 # Copy binary from builder

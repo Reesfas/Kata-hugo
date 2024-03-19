@@ -31,11 +31,23 @@ func (c *CourierController) GetStatus(ctx *gin.Context) {
 
 func (c *CourierController) MoveCourier(m webSocketMessage) {
 	var cm CourierMove
-	var data []byte
-	if err := json.Unmarshal(data, &cm); err != nil {
-		log.Fatal(err)
-	}
+	var err error
 
+	switch data := m.Data.(type) {
+	case string:
+		// If data is already a string, use it directly
+		err = json.Unmarshal([]byte(data), &cm)
+	case []byte:
+		// If data is a byte slice, use it directly
+		err = json.Unmarshal(data, &cm)
+	default:
+		log.Println("Error: Unsupported data type in webSocketMessage")
+		return
+	}
+	if err != nil {
+		log.Println("Error deserializing courier move data:", err)
+		return
+	}
 	// Вызываем метод MoveCourier у courierService
 	c.courierService.MoveCourier(context.Background(), cm.Direction, cm.Zoom)
 
