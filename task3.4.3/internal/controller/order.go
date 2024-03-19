@@ -28,7 +28,7 @@ func NewOrderRep(serv service.OrderService) OrderContr {
 // @Description Create a new order in the store
 // @Accept json
 // @Produce json
-// @Param order body Order true "Order object that needs to be added to the store"
+// @Param order body repository.Order true "Order object that needs to be added to the store"
 // @Success 200 {object} string "Successful operation"
 // @Failure 400 {string} string "Invalid order data"
 // @Failure 500 {string} string "Internal server error"
@@ -52,7 +52,7 @@ func (o *OrderContr) Create(w http.ResponseWriter, r *http.Request) {
 // @Description Get order information by ID
 // @Produce json
 // @Param orderId path string true "ID of the order to get"
-// @Success 200 {object} Order "Successful operation"
+// @Success 200 {object} repository.Order "Successful operation"
 // @Failure 404 {string} string "Order not found"
 // @Router /store/order/{orderId} [get]
 func (o *OrderContr) GetByID(w http.ResponseWriter, r *http.Request) {

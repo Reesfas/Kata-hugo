@@ -1,0 +1,474 @@
+definitions:
+  repository.Conditions:
+    properties:
+      limit:
+        type: integer
+      offset:
+        type: integer
+    type: object
+  repository.Order:
+    type: object
+  repository.Pet:
+    type: object
+  repository.User:
+    properties:
+      deleted:
+        type: boolean
+      email:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: integer
+      lastName:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      status:
+        type: integer
+      username:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /pet:
+    post:
+      consumes:
+      - application/json
+      description: Add a new pet to the store
+      parameters:
+      - description: Pet object that needs to be added to the store
+        in: body
+        name: pet
+        required: true
+        schema:
+          $ref: '#/definitions/repository.Pet'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: string
+        "400":
+          description: Invalid pet data
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Create a pet
+    put:
+      consumes:
+      - application/json
+      description: Updates a pet in the store
+      parameters:
+      - description: Pet object that needs to be updated in the store
+        in: body
+        name: pet
+        required: true
+        schema:
+          $ref: '#/definitions/repository.Pet'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Failed to decode request body
+          schema:
+            type: string
+        "500":
+          description: Failed to update pet
+          schema:
+            type: string
+      summary: Update a pet
+  /pet/{petId}:
+    get:
+      description: Get pet information by ID
+      parameters:
+      - description: ID of the pet to get
+        in: path
+        name: petId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/repository.Pet'
+        "404":
+          description: Pet not found
+          schema:
+            type: string
+      summary: Get pet by ID
+    post:
+      consumes:
+      - application/json
+      description: Updates a pet in the store with form data
+      parameters:
+      - description: ID of the pet to update
+        in: path
+        name: petId
+        required: true
+        type: string
+      - description: Name of the pet
+        in: formData
+        name: name
+        type: string
+      - description: Status of the pet
+        in: formData
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Failed to decode request body
+          schema:
+            type: string
+        "500":
+          description: Failed to update pet
+          schema:
+            type: string
+      summary: Update a pet with form data
+  /pet/{petId}/uploadImage:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads an image for a pet
+      parameters:
+      - description: ID of the pet to upload image for
+        in: path
+        name: petId
+        required: true
+        type: string
+      - description: Image file to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: object
+        "400":
+          description: Failed to get file from request
+          schema:
+            type: string
+        "500":
+          description: Failed to upload image
+          schema:
+            type: string
+      summary: Upload an image for a pet
+  /pet/findByStatus:
+    get:
+      description: Finds pets by status
+      parameters:
+      - description: Status value to search for
+        in: query
+        name: status
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            items:
+              $ref: '#/definitions/repository.Pet'
+            type: array
+        "404":
+          description: Pets not found
+          schema:
+            type: string
+      summary: Find pets by status
+  /store/inventory:
+    get:
+      description: Get inventory of the store
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get inventory
+  /store/order:
+    post:
+      consumes:
+      - application/json
+      description: Create a new order in the store
+      parameters:
+      - description: Order object that needs to be added to the store
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/repository.Order'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: string
+        "400":
+          description: Invalid order data
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Create an order
+  /store/order/{orderId}:
+    delete:
+      description: Delete order by ID
+      parameters:
+      - description: ID of the order to delete
+        in: path
+        name: orderId
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Delete order by ID
+    get:
+      description: Get order information by ID
+      parameters:
+      - description: ID of the order to get
+        in: path
+        name: orderId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/repository.Order'
+        "404":
+          description: Order not found
+          schema:
+            type: string
+      summary: Get order by ID
+  /user:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user
+      parameters:
+      - description: User object that needs to be added
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/repository.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: string
+        "400":
+          description: Invalid user data
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Create user
+  /user/{username}:
+    delete:
+      description: Delete user by username
+      parameters:
+      - description: Username of the user to delete
+        in: path
+        name: username
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Delete user
+    get:
+      description: Get user information by username
+      parameters:
+      - description: Username of the user to get
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/repository.User'
+        "404":
+          description: User not found
+          schema:
+            type: string
+      summary: Get user by username
+    put:
+      consumes:
+      - application/json
+      description: Update an existing user
+      parameters:
+      - description: Username of the user to update
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: User object with updated information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/repository.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/repository.User'
+        "400":
+          description: Invalid user data
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Update user
+  /user/createWithArray:
+    post:
+      consumes:
+      - application/json
+      description: Creates new users with an array of user objects
+      parameters:
+      - description: Array of user objects to create
+        in: body
+        name: users
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/repository.User'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Failed to decode request body
+          schema:
+            type: string
+        "500":
+          description: Failed to create users
+          schema:
+            type: string
+      summary: Create users with array input
+  /user/createWithList:
+    post:
+      consumes:
+      - application/json
+      description: Creates new users with a list of user objects
+      parameters:
+      - description: List of user objects to create
+        in: body
+        name: users
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/repository.User'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Failed to decode request body
+          schema:
+            type: string
+        "500":
+          description: Failed to create users
+          schema:
+            type: string
+      summary: Create users with list input
+  /user/login:
+    get:
+      consumes:
+      - application/json
+      description: Logs user into the system
+      parameters:
+      - description: Username for login
+        in: body
+        name: username
+        required: true
+        schema:
+          type: string
+      - description: Password for login
+        in: body
+        name: password
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: string
+        "400":
+          description: Invalid request format
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: User login
+  /user/logout:
+    get:
+      description: Logs out current logged in user session
+      responses:
+        "200":
+          description: Old cookie deleted. Logged out!
+          schema:
+            type: string
+      summary: User logout
+swagger: "2.0"

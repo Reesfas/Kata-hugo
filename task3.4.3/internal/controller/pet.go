@@ -31,7 +31,7 @@ func NewPetRep(pet service.PetService) *PetContr {
 // @Description Add a new pet to the store
 // @Accept json
 // @Produce json
-// @Param pet body Pet true "Pet object that needs to be added to the store"
+// @Param pet body repository.Pet true "Pet object that needs to be added to the store"
 // @Success 200 {object} string "Successful operation"
 // @Failure 400 {string} string "Invalid pet data"
 // @Failure 500 {string} string "Internal server error"
@@ -55,7 +55,7 @@ func (p *PetContr) Create(w http.ResponseWriter, r *http.Request) {
 // @Description Get pet information by ID
 // @Produce json
 // @Param petId path string true "ID of the pet to get"
-// @Success 200 {object} Pet "Successful operation"
+// @Success 200 {object} repository.Pet "Successful operation"
 // @Failure 404 {string} string "Pet not found"
 // @Router /pet/{petId} [get]
 func (p *PetContr) GetByID(w http.ResponseWriter, r *http.Request) {
@@ -79,7 +79,7 @@ func (p *PetContr) GetByID(w http.ResponseWriter, r *http.Request) {
 // @Description Finds pets by status
 // @Produce json
 // @Param status query string true "Status value to search for"
-// @Success 200 {object} []Pet "Successful operation"
+// @Success 200 {object} []repository.Pet "Successful operation"
 // @Failure 404 {string} string "Pets not found"
 // @Router /pet/findByStatus [get]
 func (p *PetContr) GetByStatus(w http.ResponseWriter, r *http.Request) {
@@ -103,7 +103,7 @@ func (p *PetContr) GetByStatus(w http.ResponseWriter, r *http.Request) {
 // @Description Updates a pet in the store
 // @Accept json
 // @Produce json
-// @Param pet body Pet true "Pet object that needs to be updated in the store"
+// @Param pet body repository.Pet true "Pet object that needs to be updated in the store"
 // @Success 200 "OK"
 // @Failure 400 {string} string "Failed to decode request body"
 // @Failure 500 {string} string "Failed to update pet"

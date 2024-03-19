@@ -11,7 +11,6 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose/v3"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/ptflp/godecoder"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"gitlab.com/ptflp/goboilerplate/config"
@@ -22,9 +21,11 @@ import (
 	"hugo/task4.2.4/proxy/internal/service"
 	"log"
 	"net/http"
+	"net/http/pprof"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
+	runpp "runtime/pprof"
 	"syscall"
 	"time"
 )
@@ -101,11 +102,20 @@ func main() {
 		r.Use(jwtauth.Verifier(tokenAuth))
 		r.Use(jwtauth.Authenticator)
 
-		r.Post("/api/address/search", measureDuration("search", geocode.Search))
-		r.Post("/api/address/geocode", measureDuration("geocode", geocode.GeocodeAddress))
-	})
-	r.Handle("/metrics", promhttp.Handler())
+		r.Post("/api/address/search", geocode.Search)
+		r.Post("/api/address/geocode", geocode.GeocodeAddress)
 
+		r.Handle("/mycustompath/pprof/allocs", http.HandlerFunc(pprof.Handler("allocs").ServeHTTP))
+		r.Handle("/mycustompath/pprof/block", http.HandlerFunc(pprof.Handler("block").ServeHTTP))
+		r.Handle("/mycustompath/pprof/cmdline", http.HandlerFunc(pprof.Cmdline))
+		r.Handle("/mycustompath/pprof/goroutine", http.HandlerFunc(pprof.Handler("goroutine").ServeHTTP))
+		r.Handle("/mycustompath/pprof/heap", http.HandlerFunc(pprof.Handler("heap").ServeHTTP))
+		r.Handle("/mycustompath/pprof/mutex", http.HandlerFunc(pprof.Handler("mutex").ServeHTTP))
+		r.Handle("/mycustompath/pprof/profile", http.HandlerFunc(pprof.Profile))
+		r.Handle("/mycustompath/pprof/threadcreate", http.HandlerFunc(pprof.Handler("threadcreate").ServeHTTP))
+		r.Handle("/mycustompath/pprof/trace", http.HandlerFunc(pprof.Trace))
+	})
+	saveProfiles()
 	server := &http.Server{
 		Addr:         ":8080",
 		Handler:      r,
@@ -133,11 +143,25 @@ func main() {
 
 }
 
-func measureDuration(endpoint string, next http.HandlerFunc) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		next(w, r)
-		duration := time.Since(start).Seconds()
-		requestDuration.WithLabelValues(endpoint, r.Method).Observe(duration)
-	})
+func saveProfiles() {
+	cpuProfile, err := os.Create("cpu.prof")
+	if err != nil {
+		log.Fatalf("failed to create CPU profile: %v", err)
+	}
+	defer cpuProfile.Close()
+
+	heapProfile, err := os.Create("heap.prof")
+	if err != nil {
+		log.Fatalf("failed to create heap profile: %v", err)
+	}
+	defer heapProfile.Close()
+
+	if err := runpp.StartCPUProfile(cpuProfile); err != nil {
+		log.Fatalf("failed to start CPU profile: %v", err)
+	}
+	defer runpp.StopCPUProfile()
+
+	if err := runpp.WriteHeapProfile(heapProfile); err != nil {
+		log.Fatalf("failed to write heap profile: %v", err)
+	}
 }

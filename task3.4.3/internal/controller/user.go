@@ -31,7 +31,7 @@ func NewUserController(userService service.UserService) *UserContr {
 // @Description Create a new user
 // @Accept json
 // @Produce json
-// @Param user body User true "User object that needs to be added"
+// @Param user body repository.User true "User object that needs to be added"
 // @Success 200 {object} string "Successful operation"
 // @Failure 400 {string} string "Invalid user data"
 // @Failure 500 {string} string "Internal server error"
@@ -56,7 +56,7 @@ func (u *UserContr) CreateUser(w http.ResponseWriter, r *http.Request) {
 // @Description Get user information by username
 // @Produce json
 // @Param username path string true "Username of the user to get"
-// @Success 200 {object} User "Successful operation"
+// @Success 200 {object} repository.User "Successful operation"
 // @Failure 404 {string} string "User not found"
 // @Router /user/{username} [get]
 func (u *UserContr) GetUser(w http.ResponseWriter, r *http.Request) {
@@ -81,8 +81,8 @@ func (u *UserContr) GetUser(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Param username path string true "Username of the user to update"
-// @Param user body User true "User object with updated information"
-// @Success 200 {object} User "Successful operation"
+// @Param user body repository.User true "User object with updated information"
+// @Success 200 {object} repository.User "Successful operation"
 // @Failure 400 {string} string "Invalid user data"
 // @Failure 500 {string} string "Internal server error"
 // @Router /user/{username} [put]
@@ -135,8 +135,8 @@ func (u *UserContr) DeleteUser(w http.ResponseWriter, r *http.Request) {
 // @Description List users based on provided conditions
 // @Accept json
 // @Produce json
-// @Param conditions body Conditions true "Conditions for filtering users"
-// @Success 200 {array} User "Successful operation"
+// @Param conditions body repository.Conditions true "Conditions for filtering users"
+// @Success 200 {array} repository.User "Successful operation"
 // @Failure 400 {string} string "Invalid request body"
 // @Failure 500 {string} string "Internal server error"
 // @Router /user/createWithList [post]
@@ -211,7 +211,7 @@ func (u *UserContr) Logout(w http.ResponseWriter, r *http.Request) {
 // @Description Creates new users with an array of user objects
 // @Accept json
 // @Produce json
-// @Param users body []User true "Array of user objects to create"
+// @Param users body []repository.User true "Array of user objects to create"
 // @Success 201 "Created"
 // @Failure 400 {string} string "Failed to decode request body"
 // @Failure 500 {string} string "Failed to create users"
@@ -236,7 +236,7 @@ func (u *UserContr) CreateUserWithArray(w http.ResponseWriter, r *http.Request) 
 // @Description Creates new users with a list of user objects
 // @Accept json
 // @Produce json
-// @Param users body []User true "List of user objects to create"
+// @Param users body []repository.User true "List of user objects to create"
 // @Success 201 "Created"
 // @Failure 400 {string} string "Failed to decode request body"
 // @Failure 500 {string} string "Failed to create users"

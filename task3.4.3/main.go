@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"github.com/urfave/negroni"
 	"log"
 	"net/http"
@@ -15,32 +16,26 @@ import (
 )
 
 func main() {
-	// Подключение к базе данных PostgreSQL
 	db, err := sql.Open("postgres", "postgres://username:password@localhost/dbname?sslmode=disable")
 	if err != nil {
 		log.Fatal("Could not connect to the database:", err)
 	}
 	defer db.Close()
 
-	// Инициализация репозиториев
 	userRepo := repository.NewUserRepository(db)
 	petRepo := repository.NewPetRep(db)
 	orderRepo := repository.NewOrderRep(db)
 
-	// Инициализация сервисов
 	userService := service.NewUserService(userRepo)
 	petService := service.NewPetServ(petRepo)
 	orderService := service.NewOrderServ(orderRepo)
 
-	// Инициализация контроллеров
 	userController := controller.NewUserController(userService)
 	petController := controller.NewPetRep(petService)
 	orderController := controller.NewOrderRep(orderService)
 
-	// Инициализация маршрутизатора Gorilla Mux
 	r := mux.NewRouter()
 
-	// Регистрация обработчиков маршрутов
 	r.HandleFunc("/users", userController.CreateUser).Methods("POST")
 	r.HandleFunc("/users/{username}", userController.GetUser).Methods("GET")
 	r.HandleFunc("/users/{username}", userController.UpdateUser).Methods("PUT")
@@ -61,7 +56,7 @@ func main() {
 	r.HandleFunc("/orders/{id}", orderController.GetByID).Methods("GET")
 	r.HandleFunc("/orders/{id}", orderController.Delete).Methods("DELETE")
 	r.HandleFunc("/orders/inventory", orderController.GetInventory).Methods("GET")
-
+	r.HandleFunc("/swagger/*", httpSwagger.Handler())
 	n := negroni.New()
 
 	n.Use(negroni.HandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
@@ -70,7 +65,6 @@ func main() {
 
 	n.UseHandler(r)
 
-	// Запуск HTTP сервера
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
