@@ -11,7 +11,6 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose/v3"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/ptflp/godecoder"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"gitlab.com/ptflp/goboilerplate/config"
@@ -22,9 +21,11 @@ import (
 	"hugo/task4.2.4/proxy/internal/service"
 	"log"
 	"net/http"
+	"net/http/pprof"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -50,21 +51,21 @@ func init() {
 func main() {
 	err1 := godotenv.Load("db.env")
 	if err1 != nil {
-		log.Fatal("Ошибка загрузки файла .env")
+		//log.Fatal("Ошибка загрузки файла .env")
 	}
 
 	db, err := sql.Open("postgres", "user="+os.Getenv("DB_USER")+" password="+os.Getenv("DB_PASSWORD")+" dbname="+os.Getenv("DB_NAME")+" host="+os.Getenv("DB_HOST")+" port="+os.Getenv("DB_PORT")+" sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = db.Ping()
+	//err = db.Ping()
 	if err != nil {
 		log.Fatalf("Something wrong with database %v", err)
 	}
 	dir := "./migrations"
 
 	if err = goose.Up(db, dir); err != nil {
-		log.Fatalf("failed to apply migrations: %v", err)
+		//log.Fatalf("failed to apply migrations: %v", err)
 	}
 
 	r := chi.NewRouter()
@@ -104,8 +105,7 @@ func main() {
 		r.Post("/api/address/search", measureDuration("search", geocode.Search))
 		r.Post("/api/address/geocode", measureDuration("geocode", geocode.GeocodeAddress))
 	})
-	r.Handle("/metrics", promhttp.Handler())
-
+	r.Handle("/metrics", pprofHandler())
 	server := &http.Server{
 		Addr:         ":8080",
 		Handler:      r,
@@ -139,5 +139,18 @@ func measureDuration(endpoint string, next http.HandlerFunc) http.HandlerFunc {
 		next(w, r)
 		duration := time.Since(start).Seconds()
 		requestDuration.WithLabelValues(endpoint, r.Method).Observe(duration)
+	})
+}
+
+func pprofHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch strings.TrimPrefix(r.URL.Path, "/mycustompath/pprof") {
+		case "/allocs", "/block", "/cmdline", "/goroutine", "/heap", "/mutex", "/profile", "/threadcreate", "/trace":
+			pprof.Index(w, r)
+		case "/":
+			pprof.Index(w, r)
+		default:
+			pprof.Handler(strings.TrimPrefix(r.URL.Path, "/mycustompath/pprof")).ServeHTTP(w, r)
+		}
 	})
 }

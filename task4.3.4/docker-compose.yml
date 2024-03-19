@@ -2,13 +2,9 @@ version: '3'
 
 services:
   grafana:
-    build: ./grafana
-    ports:
-      - "3000:3000"
-    networks:
-      - mylocal
-    depends_on:
-      - prometheus
+      image: grafana/grafana
+      ports:
+        - "3000:3000"
   server:
     image: klakegg/hugo:0.101.0-ext-alpine
     container_name: hugo

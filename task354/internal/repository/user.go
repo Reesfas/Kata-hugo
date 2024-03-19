@@ -10,6 +10,16 @@ type UserRepository struct {
 	*sql.DB
 }
 
+func (r *UserRepository) CreateUser(name string) error {
+	query := "INSERT INTO Users (Name) VALUES ($1);"
+	_, err := r.DB.Exec(query, name)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *UserRepository) GetUserByID(userID int) (*service.User, error) {
 	var user service.User
 	err := r.DB.QueryRow("SELECT id, name FROM users WHERE id = $1", userID).Scan(&user.ID, &user.Name)
