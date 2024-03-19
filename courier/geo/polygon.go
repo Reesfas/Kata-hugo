@@ -22,9 +22,9 @@ type Polygon struct {
 }
 
 func NewPolygon(points []Point, allowed bool) *Polygon {
-	geoPoints := make([]*geo.Point, len(points))
-	for i, p := range points {
-		geoPoints[i] = geo.NewPoint(p.Lat, p.Lng)
+	var geoPoints []*geo.Point
+	for _, p := range points {
+		geoPoints = append(geoPoints, geo.NewPoint(p.Lat, p.Lng))
 	}
 
 	polygon := geo.NewPolygon(geoPoints)
@@ -44,41 +44,53 @@ func (p *Polygon) Allowed() bool {
 }
 
 func (p *Polygon) RandomPoint() Point {
-	minX, minY, maxX, maxY := p.polygon.Points()[0].Lat(), p.polygon.Points()[0].Lng(), p.polygon.Points()[0].Lat(), p.polygon.Points()[0].Lng()
 
-	for _, point := range p.polygon.Points() {
-		switch {
-		case point.Lat() < minX:
-			minX = point.Lat()
-		case point.Lat() > maxX:
-			maxX = point.Lat()
+	minLat := p.polygon.Points()[0].Lat()
+	maxLat := p.polygon.Points()[0].Lat()
+	minLng := p.polygon.Points()[0].Lng()
+	maxLng := p.polygon.Points()[0].Lng()
+
+	for _, point := range p.polygon.Points()[1:] {
+		lat := point.Lat()
+		lng := point.Lng()
+
+		if lat < minLat {
+			minLat = lat
 		}
-		switch {
-		case point.Lng() < minY:
-			minY = point.Lng()
-		case point.Lng() > maxY:
-			maxY = point.Lng()
+		if lat > maxLat {
+			maxLat = lat
+		}
+		if lng < minLng {
+			minLng = lng
+		}
+		if lng > maxLng {
+			maxLng = lng
 		}
 	}
 
-	randX := rand.Float64()*(maxX-minX) + minX
-	randY := rand.Float64()*(maxY-minY) + minY
+	randlat := rand.Float64()*(maxLat-minLat) + minLat
+	randlng := rand.Float64()*(maxLng-minLng) + minLng
 
-	return Point{Lat: randY, Lng: randX}
+	return Point{Lat: randlat, Lng: randlng}
 }
 
 func CheckPointIsAllowed(point Point, allowedZone PolygonChecker, disabledZones []PolygonChecker) bool {
 	// Проверяем, находится ли точка в разрешенной зоне
-	if allowedZone.Contains(point) && allowedZone.Allowed() {
-		// Проверяем, находится ли точка в одной из запрещенных зон
-		for _, zone := range disabledZones {
-			if zone.Contains(point) && !zone.Allowed() {
-				return false
-			}
-		}
-		return true
+	if !allowedZone.Allowed() {
+		return false
 	}
-	return false
+
+	if !allowedZone.Contains(point) {
+		return false
+	}
+
+	for _, zone := range disabledZones {
+		if zone.Allowed() || zone.Contains(point) {
+			return false
+		}
+	}
+
+	return true
 }
 
 func GetRandomAllowedLocation(allowedZone PolygonChecker, disabledZones []PolygonChecker) Point {

@@ -42,6 +42,7 @@ func (os *OrderService) GetByRadius(ctx context.Context, lng, lat, radius float6
 }
 
 func (os *OrderService) Save(ctx context.Context, order models.Order) error {
+	order.CreatedAt = time.Now()
 	return os.storage.Save(ctx, order, orderMaxAge)
 }
 
@@ -59,7 +60,7 @@ func (os *OrderService) GenerateOrder(ctx context.Context) error {
 		return err
 	}
 
-	randomPoint := os.allowedZone.RandomPoint()
+	randomPoint := geo.GetRandomAllowedLocation(os.allowedZone, os.disabledZones)
 
 	price := minOrderPrice + rand.Float64()*(maxOrderPrice-minOrderPrice)
 	deliveryPrice := minDeliveryPrice + rand.Float64()*(maxDeliveryPrice-minDeliveryPrice)
@@ -70,6 +71,7 @@ func (os *OrderService) GenerateOrder(ctx context.Context) error {
 		DeliveryPrice: deliveryPrice,
 		Lng:           randomPoint.Lng,
 		Lat:           randomPoint.Lat,
+		IsDelivered:   false,
 		CreatedAt:     time.Now(),
 	}
 

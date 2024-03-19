@@ -7,9 +7,8 @@ RUN go build -ldflags="-w -s" -o /go/bin/server /go/src/gitlab.com/ptflp/geotask
 FROM alpine:3.15
 # Copy binary from builder
 COPY --from=builder /go/bin/server /go/bin/server
-COPY public /app/public
-COPY docs /app/docs
-COPY .env /app/.env
+COPY ./public /app/public
+COPY ./.env /app/.env
 
 WORKDIR /app
 # Set entrypoint

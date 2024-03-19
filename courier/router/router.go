@@ -14,7 +14,7 @@ func NewRouter(courier *controller.CourierController) *Router {
 }
 
 func (r *Router) CourierAPI(router *gin.RouterGroup) {
-	router.GET("/courier/status", r.courier.GetStatus)
+	router.GET("/status", r.courier.GetStatus)
 	router.GET("/ws", r.courier.Websocket)
 
 }

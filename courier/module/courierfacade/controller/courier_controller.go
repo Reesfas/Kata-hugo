@@ -35,10 +35,8 @@ func (c *CourierController) MoveCourier(m webSocketMessage) {
 
 	switch data := m.Data.(type) {
 	case string:
-		// If data is already a string, use it directly
 		err = json.Unmarshal([]byte(data), &cm)
 	case []byte:
-		// If data is a byte slice, use it directly
 		err = json.Unmarshal(data, &cm)
 	default:
 		log.Println("Error: Unsupported data type in webSocketMessage")
@@ -49,7 +47,7 @@ func (c *CourierController) MoveCourier(m webSocketMessage) {
 		return
 	}
 	// Вызываем метод MoveCourier у courierService
-	c.courierService.MoveCourier(context.Background(), cm.Direction, cm.Zoom)
+	c.courierService.MoveCourier(context.TODO(), cm.Direction, cm.Zoom)
 
 	log.Println("______Обработаны данные о перемещении курьера")
 }

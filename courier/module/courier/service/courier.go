@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"gitlab.com/ptflp/geotask/geo"
 	"gitlab.com/ptflp/geotask/module/courier/models"
 	"gitlab.com/ptflp/geotask/module/courier/storage"
@@ -42,10 +43,10 @@ func (c *CourierService) GetCourier(ctx context.Context) (*models.Courier, error
 	if err != nil {
 		return nil, err
 	}
-
 	if !c.allowedZone.Contains(geo.Point(courier.Location)) {
 		newLocation := c.allowedZone.RandomPoint()
-		courier.Location = models.Point(newLocation)
+		courier.Location.Lat = newLocation.Lat
+		courier.Location.Lng = newLocation.Lng
 
 		err = c.courierStorage.Save(ctx, *courier)
 		if err != nil {
@@ -61,35 +62,26 @@ func (c *CourierService) MoveCourier(courier models.Courier, direction, zoom int
 	// Вычисляем точность перемещения в зависимости от зума карты
 	precision := 0.001 / math.Pow(2, float64(zoom-14))
 
-	// Определяем направление перемещения
-	var latDiff, lngDiff float64
 	switch direction {
 	case DirectionUp:
-		latDiff = precision
+		courier.Location.Lat += precision
 	case DirectionDown:
-		latDiff = -precision
+		courier.Location.Lat -= precision
 	case DirectionLeft:
-		lngDiff = -precision
+		courier.Location.Lng -= precision
 	case DirectionRight:
-		lngDiff = precision
+		courier.Location.Lng += precision
+	default:
+		return errors.New("unknown direction")
 	}
-
-	// Вычисляем новые координаты курьера
-	newLat := courier.Location.Lat + latDiff
-	newLng := courier.Location.Lng + lngDiff
-
-	// Создаем новую точку для проверки выхода за границы зоны
-	newLocation := models.Point{Lat: newLat, Lng: newLng}
 
 	// Проверяем, находится ли курьер в разрешенной зоне
-	if !c.allowedZone.Contains(geo.Point(newLocation)) {
-		// Курьер вышел за границы разрешенной зоны
-		// Перемещаем его в случайную точку внутри зоны
-		newLocation = models.Point(c.allowedZone.RandomPoint())
+	courierLocation := geo.Point{Lat: courier.Location.Lat, Lng: courier.Location.Lng}
+	if !c.allowedZone.Contains(courierLocation) {
+		randomPoint := c.allowedZone.RandomPoint()
+		courier.Location.Lat = randomPoint.Lat
+		courier.Location.Lng = randomPoint.Lng
 	}
-
-	// Обновляем координаты курьера
-	courier.Location = newLocation
 
 	// Сохраняем изменения в хранилище
 	err := c.courierStorage.Save(context.Background(), courier)

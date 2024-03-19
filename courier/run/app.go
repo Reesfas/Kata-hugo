@@ -1,6 +1,7 @@
 package run
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	"gitlab.com/ptflp/geotask/cache"
 	"gitlab.com/ptflp/geotask/geo"
@@ -15,6 +16,7 @@ import (
 	"gitlab.com/ptflp/geotask/workers/order"
 	"net/http"
 	"os"
+	"time"
 )
 
 type App struct {
@@ -32,6 +34,8 @@ func (a *App) Run() error {
 	// инициализация клиента redis
 	rclient := cache.NewRedisClient(host, port)
 
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
 	// проверка доступности redis
 	_, err := rclient.Ping().Result()
 	if err != nil {
@@ -49,10 +53,10 @@ func (a *App) Run() error {
 	orderService := oservice.NewOrderService(orderStorage, allowedZone, disAllowedZones)
 
 	orderGenerator := order.NewOrderGenerator(orderService)
-	orderGenerator.Run()
+	orderGenerator.Run(ctx)
 
 	oldOrderCleaner := order.NewOrderCleaner(orderService)
-	oldOrderCleaner.Run()
+	oldOrderCleaner.Run(ctx)
 
 	// инициализация хранилища курьеров
 	courierStorage := cstorage.NewCourierStorage(rclient)

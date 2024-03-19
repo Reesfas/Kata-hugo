@@ -30,11 +30,11 @@ func NewCourierFacade(courierService cservice.Courierer, orderService oservice.O
 func (cf *CourierFacade) MoveCourier(ctx context.Context, direction, zoom int) {
 	courier, err := cf.courierService.GetCourier(ctx)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 		return
 	}
 	if err = cf.courierService.MoveCourier(*courier, direction, zoom); err != nil {
-		log.Println(err)
+		log.Fatal(err)
 		return
 	}
 }
@@ -42,7 +42,7 @@ func (cf *CourierFacade) MoveCourier(ctx context.Context, direction, zoom int) {
 func (cf *CourierFacade) GetStatus(ctx context.Context) cfm.CourierStatus {
 	courier, err := cf.courierService.GetCourier(ctx)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 		return cfm.CourierStatus{} // Возвращаем пустой статус
 	}
 

@@ -36,10 +36,17 @@ func (cs *CourierStorage) Save(ctx context.Context, courier models.Courier) erro
 
 func (cs *CourierStorage) GetOne(ctx context.Context) (*models.Courier, error) {
 	courierJSON, err := cs.storage.Get("courier").Result()
+	if err == redis.Nil {
+		cs.Save(ctx, models.Courier{
+			Location: models.Point{
+				Lat: 59.9311,
+				Lng: 30.3609,
+			},
+		})
+	}
 	if err != nil {
 		return nil, err
 	}
-
 	var courier models.Courier
 	err = json.Unmarshal([]byte(courierJSON), &courier)
 	if err != nil {
