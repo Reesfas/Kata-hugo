@@ -31,8 +31,20 @@ services:
       - "./hugo/content:/app/static"
     ports:
       - "8080:8080"
+    depends_on:
+      - postgres
     networks:
         - mylocal
+  prometheus:
+    image: prom/prometheus:v2.30.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus:/etc/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    networks:
+      - mylocal
 volumes:
   postgres_data:
 networks:

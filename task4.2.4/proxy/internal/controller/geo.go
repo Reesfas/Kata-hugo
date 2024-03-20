@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"hugo/task4.2.4/proxy/internal/repository"
 	"hugo/task4.2.4/proxy/internal/service"
+	"hugo/task4.2.4/proxy/metrics"
 	"log"
 	"net/http"
 )
@@ -38,6 +39,7 @@ func NewGeo(geocoder service.Geocoder, responder Responder) Geocoderer {
 // @failure 500 {object} string "Dadata API недоступен"
 // @router /api/address/search [post]
 func (g *Geo) Search(w http.ResponseWriter, r *http.Request) {
+	metrics.ApiCount.Inc()
 	var request repository.SearchRequest
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {

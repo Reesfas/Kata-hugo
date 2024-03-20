@@ -6,9 +6,9 @@ WORKDIR /app
 
 # Копируем исходники приложения в рабочую директорию
 COPY . .
-
+COPY ./prometheus /app/prometheus
 # Скачиваем все зависимости
-RUN go mod tidy
+#RUN go mod tidy
 
 # Собираем приложение
 RUN go build -o main
@@ -22,8 +22,10 @@ COPY --from=builder /app/docs /docs
 COPY --from=builder /app/internal /internal
 COPY --from=builder /app/migrations /migrations
 COPY --from=builder /app/db.env .
+COPY --from=builder /app/prometheus /prometheus
 # Открываем порт 8080
 EXPOSE 8080
-
+EXPOSE 9090
+EXPOSE 5432
 # Запускаем приложение
 CMD ["/main"]

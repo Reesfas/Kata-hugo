@@ -57,10 +57,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = db.Ping()
-	if err != nil {
-		log.Fatalf("Something wrong with database %v", err)
-	}
 	dir := "./migrations"
 
 	if err = goose.Up(db, dir); err != nil {
@@ -98,11 +94,11 @@ func main() {
 	r.Post("/api/login", login)
 
 	r.Group(func(r chi.Router) {
-		r.Use(jwtauth.Verifier(tokenAuth))
-		r.Use(jwtauth.Authenticator)
+		//r.Use(jwtauth.Verifier(tokenAuth))
+		//	r.Use(jwtauth.Authenticator)
 
-		r.Post("/api/address/search", measureDuration("search", geocode.Search))
-		r.Post("/api/address/geocode", measureDuration("geocode", geocode.GeocodeAddress))
+		r.Post("/api/address/search", geocode.Search)
+		r.Post("/api/address/geocode", geocode.GeocodeAddress)
 	})
 	r.Handle("/metrics", promhttp.Handler())
 
@@ -131,13 +127,4 @@ func main() {
 	}
 	<-stop
 
-}
-
-func measureDuration(endpoint string, next http.HandlerFunc) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		next(w, r)
-		duration := time.Since(start).Seconds()
-		requestDuration.WithLabelValues(endpoint, r.Method).Observe(duration)
-	})
 }
