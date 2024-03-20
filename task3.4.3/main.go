@@ -2,18 +2,22 @@ package main
 
 import (
 	"database/sql"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/jwtauth"
 	httpSwagger "github.com/swaggo/http-swagger"
-	"github.com/urfave/negroni"
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"task3.4.3/internal/controller"
 	"task3.4.3/internal/repository"
 	"task3.4.3/internal/service"
 )
+
+var tokenAuth *jwtauth.JWTAuth
+
+func init() {
+	tokenAuth = jwtauth.New("HS256", []byte("secret"), nil)
+}
 
 func main() {
 	db, err := sql.Open("postgres", "postgres://username:password@localhost/dbname?sslmode=disable")
@@ -34,74 +38,47 @@ func main() {
 	petController := controller.NewPetRep(petService)
 	orderController := controller.NewOrderRep(orderService)
 
-	r := mux.NewRouter()
+	r := chi.NewRouter()
+	r.Group(func(r chi.Router) {
+		r.Post("/users", userController.CreateUser)
+		r.Get("/users/{username}", userController.GetUser)
+		r.Put("/users/{username}", userController.UpdateUser)
+		r.Delete("/users/{id}", userController.DeleteUser)
+		r.Get("/users", userController.ListUsers)
+		r.Post("/users/login", userController.Login)
+		r.Post("/users/logout", userController.Logout)
+	})
 
-	r.HandleFunc("/users", userController.CreateUser).Methods("POST")
-	r.HandleFunc("/users/{username}", userController.GetUser).Methods("GET")
-	r.HandleFunc("/users/{username}", userController.UpdateUser).Methods("PUT")
-	r.HandleFunc("/users/{id}", userController.DeleteUser).Methods("DELETE")
-	r.HandleFunc("/users", userController.ListUsers).Methods("GET")
-	r.HandleFunc("/users/login", userController.Login).Methods("POST")
-	r.HandleFunc("/users/logout", userController.Logout).Methods("POST")
+	r.Group(func(r chi.Router) {
+		r.Use(jwtauth.Verifier(tokenAuth))
+		r.Use(jwtauth.Authenticator)
+		r.Post("/pets", petController.Create)
+		r.Get("/pets/{id}", petController.GetByID)
+		r.Get("/pets/status/{status}", petController.GetByStatus)
+		r.Post("/pets/uploadImages", petController.UploadImages)
+		r.Put("/pets/{id}", petController.FullUpdate)
+		r.Patch("/pets/{id}", petController.PartialUpdate)
+		r.Delete("/pets/{id}", petController.Delete)
+	})
 
-	r.HandleFunc("/pets", petController.Create).Methods("POST")
-	r.HandleFunc("/pets/{id}", petController.GetByID).Methods("GET")
-	r.HandleFunc("/pets/status/{status}", petController.GetByStatus).Methods("GET")
-	r.HandleFunc("/pets/uploadImages", petController.UploadImages).Methods("POST")
-	r.HandleFunc("/pets/{id}", petController.FullUpdate).Methods("PUT")
-	r.HandleFunc("/pets/{id}", petController.PartialUpdate).Methods("PATCH")
-	r.HandleFunc("/pets/{id}", petController.Delete).Methods("DELETE")
+	r.Group(func(r chi.Router) {
+		r.Post("/orders", orderController.Create)
+		r.Get("/orders/{id}", orderController.GetByID)
+		r.Delete("/orders/{id}", orderController.Delete)
 
-	r.HandleFunc("/orders", orderController.Create).Methods("POST")
-	r.HandleFunc("/orders/{id}", orderController.GetByID).Methods("GET")
-	r.HandleFunc("/orders/{id}", orderController.Delete).Methods("DELETE")
-	r.HandleFunc("/orders/inventory", orderController.GetInventory).Methods("GET")
+		r.Group(func(r chi.Router) {
+			r.Use(jwtauth.Verifier(tokenAuth))
+			r.Use(jwtauth.Authenticator)
+			r.Get("/orders/inventory", orderController.GetInventory)
+		})
+	})
+
 	r.HandleFunc("/swagger/*", httpSwagger.Handler())
-	n := negroni.New()
-
-	n.Use(negroni.HandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-		authMiddleware(next).ServeHTTP(w, r)
-	}))
-
-	n.UseHandler(r)
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 	log.Printf("Server started on port %s", port)
-	log.Fatal(http.ListenAndServe(":"+port, n))
-}
-
-func authMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		authHeader := r.Header.Get("Authorization")
-		if authHeader == "" {
-			http.Error(w, "Authorization token required", http.StatusUnauthorized)
-			return
-		}
-
-		bearerToken := strings.Split(authHeader, " ")
-		if len(bearerToken) != 2 {
-			http.Error(w, "Invalid token format", http.StatusBadRequest)
-			return
-		}
-
-		tokenString := bearerToken[1]
-
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			return []byte("secret"), nil
-		})
-		if err != nil {
-			http.Error(w, "Failed to parse token", http.StatusUnauthorized)
-			return
-		}
-
-		if !token.Valid {
-			http.Error(w, "Invalid token", http.StatusUnauthorized)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
+	log.Fatal(http.ListenAndServe(":"+port, r))
 }

@@ -4,3 +4,10 @@ id SERIAL PRIMARY KEY,
 name VARCHAR(255) NOT NULL,
 deleted BOOLEAN NOT NULL DEFAULT FALSE
     );
+
+-- +goose Down
+DROP TABLE IF EXISTS users;
+
+
+
+

@@ -1,0 +1,13 @@
+-- +goose Up
+CREATE TABLE IF NOT EXISTS pets (
+id SERIAL PRIMARY KEY,
+category_id INT NOT NULL,
+name VARCHAR(255) NOT NULL,
+photo_url VARCHAR(255),
+tags VARCHAR(255),
+status VARCHAR(255) NOT NULL,
+deleted BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+-- +goose Down
+DROP TABLE IF EXISTS pets;

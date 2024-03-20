@@ -10,7 +10,7 @@ type Pet struct {
 	id       int
 	category Category
 	name     string
-	photoUrl string //change to xml later
+	photoUrl string
 	tags     string
 	status   string
 	deleted  bool

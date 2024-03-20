@@ -10,7 +10,6 @@ import (
 	jsoniter "github.com/json-iterator/go"
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose/v3"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/ptflp/godecoder"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"gitlab.com/ptflp/goboilerplate/config"
@@ -26,18 +25,12 @@ import (
 	"os"
 	"os/signal"
 	runpp "runtime/pprof"
+	"runtime/trace"
 	"syscall"
 	"time"
 )
 
 var tokenAuth *jwtauth.JWTAuth
-
-var (
-	RequestsTotal = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "Count of search",
-		Help: "Total number of requests",
-	})
-)
 
 func init() {
 	tokenAuth = jwtauth.New("HS256", []byte("secret"), nil)
@@ -51,21 +44,21 @@ func init() {
 func main() {
 	err1 := godotenv.Load("db.env")
 	if err1 != nil {
-		log.Fatal("Ошибка загрузки файла .env")
+		//log.Fatal("Ошибка загрузки файла .env")
 	}
 
 	db, err := sql.Open("postgres", "user="+os.Getenv("DB_USER")+" password="+os.Getenv("DB_PASSWORD")+" dbname="+os.Getenv("DB_NAME")+" host="+os.Getenv("DB_HOST")+" port="+os.Getenv("DB_PORT")+" sslmode=disable")
 	if err != nil {
-		log.Fatal(err)
+		//log.Fatal(err)
 	}
 	err = db.Ping()
 	if err != nil {
-		log.Fatalf("Something wrong with database %v", err)
+		//log.Fatalf("Something wrong with database %v", err)
 	}
 	dir := "./migrations"
 
 	if err = goose.Up(db, dir); err != nil {
-		log.Fatalf("failed to apply migrations: %v", err)
+		//log.Fatalf("failed to apply migrations: %v", err)
 	}
 
 	r := chi.NewRouter()
@@ -104,7 +97,11 @@ func main() {
 
 		r.Post("/api/address/search", geocode.Search)
 		r.Post("/api/address/geocode", geocode.GeocodeAddress)
+	})
 
+	r.Group(func(r chi.Router) {
+		r.Use(jwtauth.Verifier(tokenAuth))
+		r.Use(jwtauth.Authenticator)
 		r.Handle("/mycustompath/pprof/allocs", http.HandlerFunc(pprof.Handler("allocs").ServeHTTP))
 		r.Handle("/mycustompath/pprof/block", http.HandlerFunc(pprof.Handler("block").ServeHTTP))
 		r.Handle("/mycustompath/pprof/cmdline", http.HandlerFunc(pprof.Cmdline))
@@ -115,6 +112,7 @@ func main() {
 		r.Handle("/mycustompath/pprof/threadcreate", http.HandlerFunc(pprof.Handler("threadcreate").ServeHTTP))
 		r.Handle("/mycustompath/pprof/trace", http.HandlerFunc(pprof.Trace))
 	})
+
 	saveProfiles()
 	server := &http.Server{
 		Addr:         ":8080",
@@ -144,24 +142,30 @@ func main() {
 }
 
 func saveProfiles() {
-	cpuProfile, err := os.Create("cpu.prof")
+	traceFile, err := os.Create("trace.out")
 	if err != nil {
-		log.Fatalf("failed to create CPU profile: %v", err)
+		log.Fatalf("Ошибка создания файла trace: %v", err)
 	}
-	defer cpuProfile.Close()
+	defer traceFile.Close()
 
-	heapProfile, err := os.Create("heap.prof")
+	// Запуск трассировки
+	err = trace.Start(traceFile)
 	if err != nil {
-		log.Fatalf("failed to create heap profile: %v", err)
+		log.Fatalf("Ошибка запуска трассировки: %v", err)
 	}
-	defer heapProfile.Close()
+	defer trace.Stop()
 
-	if err := runpp.StartCPUProfile(cpuProfile); err != nil {
-		log.Fatalf("failed to start CPU profile: %v", err)
+	// Создание файла profile
+	profileFile, err := os.Create("profile.prof")
+	if err != nil {
+		log.Fatalf("Ошибка создания файла profile: %v", err)
+	}
+	defer profileFile.Close()
+
+	// Запуск профилирования CPU
+	err = runpp.StartCPUProfile(profileFile)
+	if err != nil {
+		log.Fatalf("Ошибка запуска профилирования CPU: %v", err)
 	}
 	defer runpp.StopCPUProfile()
-
-	if err := runpp.WriteHeapProfile(heapProfile); err != nil {
-		log.Fatalf("failed to write heap profile: %v", err)
-	}
 }

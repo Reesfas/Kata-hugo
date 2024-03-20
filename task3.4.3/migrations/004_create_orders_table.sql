@@ -1,0 +1,12 @@
+-- +goose Up
+CREATE TABLE IF NOT EXISTS orders (
+id SERIAL PRIMARY KEY,
+pet_id INT NOT NULL,
+quantity INT NOT NULL,
+shipdate VARCHAR(255) NOT NULL,
+status VARCHAR(255) NOT NULL,
+complete BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+-- +goose Down
+DROP TABLE IF EXISTS orders;
