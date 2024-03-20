@@ -5,6 +5,8 @@ import (
 	"github.com/ekomobile/dadata/v2"
 	"github.com/ekomobile/dadata/v2/client"
 	"hugo/task4.2.4/proxy/internal/repository"
+	"hugo/task4.2.4/proxy/metrics"
+	"time"
 )
 
 type Geocoder interface {
@@ -25,10 +27,12 @@ func (g *GeocodeService) SearchService(request repository.SearchRequest) ([]*rep
 	if err != nil {
 		return nil, err
 	}
+
 	similarAddresses, err := g.repo.Search(request.Query)
 	if err != nil {
 		return nil, err
 	}
+
 	if len(similarAddresses) > 0 {
 		addresses := make([]*repository.Address, len(similarAddresses))
 		for i, addr := range similarAddresses {
@@ -36,6 +40,9 @@ func (g *GeocodeService) SearchService(request repository.SearchRequest) ([]*rep
 		}
 		return addresses, nil
 	}
+	start := time.Now()
+	metrics.ApiCount.Inc()
+
 	cleanApi := dadata.NewCleanApi(client.WithCredentialProvider(&client.Credentials{
 		ApiKeyValue:    "11cb4969967b7e68ab87b57258372aefec0eb6ac",
 		SecretKeyValue: "3461265109aaa28b20523e1b4dfb4d36e475fc9f"}))
@@ -43,6 +50,7 @@ func (g *GeocodeService) SearchService(request repository.SearchRequest) ([]*rep
 	if err != nil {
 		return nil, err
 	}
+
 	result := make([]*repository.Address, len(addresses))
 	for i, a := range addresses {
 		result[i] = &repository.Address{Lat: a.GeoLat, Lon: a.GeoLon}
@@ -52,6 +60,8 @@ func (g *GeocodeService) SearchService(request repository.SearchRequest) ([]*rep
 			return nil, err
 		}
 	}
+
+	metrics.ApiDuration.Observe(time.Since(start).Seconds())
 	return result, nil
 }
 

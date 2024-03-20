@@ -3,6 +3,8 @@ package repository
 import (
 	"database/sql"
 	"github.com/ekomobile/dadata/v2/api/suggest"
+	"hugo/task4.2.4/proxy/metrics"
+	"time"
 )
 
 type Address struct {
@@ -49,22 +51,25 @@ func NewGeoRep(db *sql.DB) *GeocodeRep {
 }
 
 func (r *GeocodeRep) Search(query string) ([]Address, error) {
+	start := time.Now()
+	metrics.DbCount.Inc()
 	var similarAddresses []Address
 	var address Address
-	rows, err := r.db.Query("SELECT * FROM address WHERE levenshtein(address_text, $1) <= LENGTH('$1') * 0.7;", query)
+	rows, err := r.db.Query("SELECT address_text, geo_lat, geo_lon FROM address WHERE levenshtein(address_text, $1) <= LENGTH($1) * 0.7;", query)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
-		if err = rows.Scan(&address.AddressText, &address.Lat, &address.Lat); err != nil {
+		if err = rows.Scan(&address.AddressText, &address.Lat, &address.Lon); err != nil {
 			return nil, err
 		}
+		similarAddresses = append(similarAddresses, address)
 	}
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
-
+	metrics.DbDuration.Observe(time.Since(start).Seconds())
 	return similarAddresses, nil
 }
 
