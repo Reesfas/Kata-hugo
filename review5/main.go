@@ -13,7 +13,7 @@ import (
 )
 
 type Object struct {
-	Records     []Record `json:"id"`
+	Records     []Record `json:"records"`
 	Skip        int      `json:"skip"`
 	Limit       int      `json:"limit"`
 	TotalAmount int      `json:"totalAmount"`
@@ -24,17 +24,17 @@ type Record struct {
 	Email     string  `json:"email"`
 	Profile   Profile `json:"profile"`
 	Password  string  `json:"password"`
-	Username  string
-	CreatedAt string `json:"createdAt"`
-	CreatedBy string
+	Username  string  `json:"username"`
+	CreatedAt string  `json:"createdAt"`
+	CreatedBy string  `json:"createdBy"`
 }
 
 type Profile struct {
-	Dob        string `json:"dob"`
-	Avatar     string `json:"avatar"`
-	LastName   string `json:"lastName"`
-	Firstname  string `json:"firstname"`
-	StaticData string `json:"staticData"`
+	Dob       string `json:"dob"`
+	Avatar    string `json:"avatar"`
+	LastName  string `json:"lastName"`
+	Firstname string `json:"firstname"`
+	//StaticData string `json:"staticData"`
 }
 
 // Если сумма на аккаунте превышает 50000 скрыть email, username, firstName, lastName, avatar
@@ -63,18 +63,19 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	err = json.NewDecoder(resp.Body).Decode(&Obj)
+	fmt.Println(Obj)
 	if err != nil {
 		http.Error(w, "Ошибка при сериализации данных", http.StatusInternalServerError)
 		return
 	}
 
-	if Obj.TotalAmount > 50000 {
-		for _, j := range Obj.Records {
-			j.Email = ""
-			j.Username = ""
-			j.Profile.Firstname = ""
-			j.Profile.LastName = ""
-			j.Profile.Avatar = ""
+	if Obj.TotalAmount < 50000 {
+		for i, _ := range Obj.Records {
+			Obj.Records[i].Email = ""
+			Obj.Records[i].Username = ""
+			Obj.Records[i].Profile.Firstname = ""
+			Obj.Records[i].Profile.LastName = ""
+			Obj.Records[i].Profile.Avatar = ""
 		}
 	}
 	err = json.NewEncoder(w).Encode(Obj)
